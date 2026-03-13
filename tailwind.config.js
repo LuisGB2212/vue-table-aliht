@@ -11,8 +11,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['DM Sans', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['Montserrat', 'system-ui', 'sans-serif'],
       },
       colors: {
         brand: {

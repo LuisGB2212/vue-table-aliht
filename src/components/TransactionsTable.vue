@@ -1,5 +1,5 @@
 <template>
-  <div class="vtt-scope vtt-root vtt-font-sans vtt-bg-white vtt-rounded-2xl vtt-border vtt-border-neutral-200 vtt-shadow-table vtt-overflow-hidden">
+  <div class="vtt-scope vtt-root vtt-bg-white vtt-rounded-2xl vtt-border vtt-border-neutral-200 vtt-shadow-table vtt-overflow-hidden">
 
     <!-- Header -->
     <div class="vtt-px-6 vtt-pt-6 vtt-pb-0">
@@ -205,10 +205,10 @@
                 />
               </td>
 
-              <td class="vtt-px-4 vtt-py-3.5 vtt-text-neutral-600 vtt-font-mono vtt-text-xs vtt-whitespace-nowrap">{{ formatDate(tx.date) }}</td>
-              <td class="vtt-px-4 vtt-py-3.5 vtt-text-neutral-500 vtt-font-mono vtt-text-xs vtt-whitespace-nowrap">{{ tx.transactionNumber }}</td>
+              <td class="vtt-px-4 vtt-py-3.5 vtt-text-neutral-600 vtt-text-xs vtt-whitespace-nowrap">{{ formatDate(tx.date) }}</td>
+              <td class="vtt-px-4 vtt-py-3.5 vtt-text-neutral-500 vtt-text-xs vtt-whitespace-nowrap">{{ tx.transactionNumber }}</td>
               <td class="vtt-px-4 vtt-py-3.5 vtt-text-neutral-800 vtt-font-medium">{{ tx.description }}</td>
-              <td class="vtt-px-4 vtt-py-3.5 vtt-text-neutral-800 vtt-font-semibold vtt-font-mono vtt-whitespace-nowrap">
+              <td class="vtt-px-4 vtt-py-3.5 vtt-text-neutral-800 vtt-font-semibold vtt-whitespace-nowrap">
                 {{ formatAmount(tx.amount) }}
               </td>
               <td class="vtt-px-4 vtt-py-3.5 vtt-text-neutral-600 vtt-whitespace-nowrap">{{ tx.category }}</td>

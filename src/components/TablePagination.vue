@@ -1,7 +1,7 @@
 <template>
   <div class="vtt-flex vtt-items-center vtt-justify-between vtt-px-4 vtt-py-3 vtt-border-t vtt-border-neutral-100">
     <!-- Info -->
-    <p class="vtt-text-xs vtt-text-neutral-500 vtt-font-mono">
+    <p class="vtt-text-xs vtt-text-neutral-500">
       Showing {{ from }}–{{ to }} of {{ total }} items
     </p>
 
