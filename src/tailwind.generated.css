@@ -649,6 +649,18 @@ video {
   margin-top: 0.5rem;
 }
 
+.vtt-mb-2{
+  margin-bottom: 0.5rem;
+}
+
+.vtt-mb-4{
+  margin-bottom: 1rem;
+}
+
+.vtt-mt-0\.5{
+  margin-top: 0.125rem;
+}
+
 .vtt-block{
   display: block;
 }
@@ -663,6 +675,10 @@ video {
 
 .vtt-grid{
   display: grid;
+}
+
+.vtt-hidden{
+  display: none;
 }
 
 .vtt-h-0\.5{
@@ -709,8 +725,16 @@ video {
   height: 1px;
 }
 
+.vtt-h-5{
+  height: 1.25rem;
+}
+
 .vtt-min-h-screen{
   min-height: 100vh;
+}
+
+.vtt-min-h-\[28px\]{
+  min-height: 28px;
 }
 
 .vtt-w-1\.5{
@@ -761,12 +785,28 @@ video {
   width: 100%;
 }
 
+.vtt-w-16{
+  width: 4rem;
+}
+
+.vtt-w-32{
+  width: 8rem;
+}
+
+.vtt-w-48{
+  width: 12rem;
+}
+
 .vtt-min-w-\[160px\]{
   min-width: 160px;
 }
 
 .vtt-min-w-\[32px\]{
   min-width: 32px;
+}
+
+.vtt-min-w-0{
+  min-width: 0px;
 }
 
 .vtt-max-w-0{
@@ -837,8 +877,16 @@ video {
   flex-direction: column;
 }
 
+.vtt-items-start{
+  align-items: flex-start;
+}
+
 .vtt-items-center{
   align-items: center;
+}
+
+.vtt-justify-end{
+  justify-content: flex-end;
 }
 
 .vtt-justify-center{
@@ -873,6 +921,14 @@ video {
   gap: 1px;
 }
 
+.vtt-gap-4{
+  gap: 1rem;
+}
+
+.vtt-gap-0{
+  gap: 0px;
+}
+
 .vtt-space-y-0\.5 > :not([hidden]) ~ :not([hidden]){
   --tw-space-y-reverse: 0;
   margin-top: calc(0.125rem * calc(1 - var(--tw-space-y-reverse)));
@@ -883,6 +939,17 @@ video {
   --tw-space-y-reverse: 0;
   margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
+}
+
+.vtt-divide-y > :not([hidden]) ~ :not([hidden]){
+  --tw-divide-y-reverse: 0;
+  border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
+  border-bottom-width: calc(1px * var(--tw-divide-y-reverse));
+}
+
+.vtt-divide-neutral-100 > :not([hidden]) ~ :not([hidden]){
+  --tw-divide-opacity: 1;
+  border-color: rgb(245 245 245 / var(--tw-divide-opacity, 1));
 }
 
 .vtt-overflow-auto{
@@ -1082,12 +1149,36 @@ video {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
 }
 
+.vtt-bg-neutral-50\/80{
+  background-color: rgb(250 250 250 / 0.8);
+}
+
+.vtt-bg-neutral-50\/10{
+  background-color: rgb(250 250 250 / 0.1);
+}
+
+.vtt-bg-neutral-500\/10{
+  background-color: rgb(115 115 115 / 0.1);
+}
+
 .vtt-p-1\.5{
   padding: 0.375rem;
 }
 
 .vtt-p-8{
   padding: 2rem;
+}
+
+.vtt-p-1{
+  padding: 0.25rem;
+}
+
+.vtt-p-4{
+  padding: 1rem;
+}
+
+.vtt-p-2{
+  padding: 0.5rem;
 }
 
 .vtt-px-1\.5{
@@ -1170,6 +1261,31 @@ video {
   padding-bottom: 1.25rem;
 }
 
+.vtt-py-2\.5{
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+}
+
+.vtt-py-4{
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.vtt-px-1{
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.vtt-px-0{
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.vtt-py-0{
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
 .vtt-pb-0{
   padding-bottom: 0px;
 }
@@ -1196,6 +1312,26 @@ video {
 
 .vtt-pt-6{
   padding-top: 1.5rem;
+}
+
+.vtt-pb-4{
+  padding-bottom: 1rem;
+}
+
+.vtt-pt-1{
+  padding-top: 0.25rem;
+}
+
+.vtt-pt-2{
+  padding-top: 0.5rem;
+}
+
+.vtt-pt-0{
+  padding-top: 0px;
+}
+
+.vtt-pb-2{
+  padding-bottom: 0.5rem;
 }
 
 .vtt-text-left{
@@ -1240,6 +1376,11 @@ video {
 .vtt-text-xs{
   font-size: 0.75rem;
   line-height: 1rem;
+}
+
+.vtt-text-xl{
+  font-size: 1.25rem;
+  line-height: 1.75rem;
 }
 
 .vtt-font-bold{
@@ -1404,6 +1545,10 @@ video {
   transition-duration: 150ms;
 }
 
+.vtt-duration-200{
+  transition-duration: 200ms;
+}
+
 .vtt-scope {
   font-family: 'Montserrat', system-ui, sans-serif;
   box-sizing: border-box;
@@ -1534,4 +1679,59 @@ video {
 .vtt-group:hover .group-hover\:vtt-text-neutral-900{
   --tw-text-opacity: 1;
   color: rgb(23 23 23 / var(--tw-text-opacity, 1));
+}
+
+@media (min-width: 640px){
+  .sm\:vtt-mb-6{
+    margin-bottom: 1.5rem;
+  }
+
+  .sm\:vtt-block{
+    display: block;
+  }
+
+  .sm\:vtt-flex{
+    display: flex;
+  }
+
+  .sm\:vtt-hidden{
+    display: none;
+  }
+
+  .sm\:vtt-p-8{
+    padding: 2rem;
+  }
+
+  .sm\:vtt-px-4{
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .sm\:vtt-px-6{
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .sm\:vtt-px-2{
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .sm\:vtt-py-3{
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .sm\:vtt-pt-6{
+    padding-top: 1.5rem;
+  }
+
+  .sm\:vtt-pt-2{
+    padding-top: 0.5rem;
+  }
+
+  .sm\:vtt-text-2xl{
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
 }

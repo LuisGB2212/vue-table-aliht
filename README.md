@@ -208,3 +208,31 @@ npm run build:lib  # Build as npm package
 ## License
 
 MIT
+
+
+para api
+{
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "perPage": 10,
+    "total": 317,
+    "totalPages": 32
+  }
+}
+
+COLUMNAS CONFIGURABLES:
+Prop            Tipo                                                Descripción
+field           string                                              Campo del objeto transaction
+label           string                                              Texto del header
+type            text|number|currency|date|status|custom|actions     Controla el renderizado
+sortable        boolean                                             Flecha de ordenamiento. Default true
+align           left|center|right                                   Alineación de header y celdas
+width           string                                              Ej: '120px', '10%'
+minWidth        string                                              Ancho mínimo
+truncate        boolean                                             Corta con … si desborda
+tooltip         boolean                                             Muestra valor completo en hover
+visible         boolean                                             Oculta la columna sin eliminarla
+cellClass       string                                              Clase CSS para cada celda
+headerClass     string                                              Clase CSS para el header
+format          (value, row) => string                              Función de formato custom

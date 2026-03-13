@@ -1,5 +1,5 @@
 <template>
-  <div class="vtt-scope vtt-min-h-screen vtt-bg-neutral-100 vtt-p-8">
+  <div class="vtt-scope vtt-min-h-screen vtt-bg-neutral-100 vtt-p-2 sm:vtt-p-8">
     <DataTable
       :sections="sections"
       :columns="columns"
@@ -11,7 +11,7 @@
       @section-change="onSectionChange"
       @selection-change="onSelectionChange"
     >
-      <template #col-voucher="{ value, row }">
+      <template #col-voucher="{ value }">
         <a v-if="value" :href="String(value)" target="_blank" @click.stop
           class="vtt-inline-flex vtt-items-center vtt-gap-1 vtt-text-xs vtt-font-medium vtt-text-blue-600 hover:vtt-text-blue-800 vtt-underline">
           <svg class="vtt-w-3 vtt-h-3" fill="none" viewBox="0 0 12 12"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
