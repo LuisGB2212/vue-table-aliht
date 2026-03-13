@@ -1,14 +1,14 @@
 <template>
-  <div class="vtt-flex vtt-items-center vtt-justify-between vtt-px-5 vtt-py-3 vtt-border-t vtt-border-neutral-100">
+  <div class="sm:vtt-flex vtt-grid vtt-gap-6 sm:vtt-items-center sm:vtt-justify-between vtt-justify-items-center vtt-px-5 vtt-py-3 vtt-border-t vtt-border-neutral-100">
 
     <!-- Left: count + mode toggle -->
     <div class="vtt-flex vtt-items-center vtt-gap-3">
       <p class="vtt-text-xs vtt-text-neutral-500 vtt-font-mono vtt-whitespace-nowrap">
         <template v-if="mode === 'paginated'">
-          {{ from }}–{{ to }} of {{ total }}
+          {{ from }}–{{ to }} de {{ total }}
         </template>
         <template v-else>
-          {{ shownCount }} of {{ total }}
+          {{ shownCount }} de {{ total }}
         </template>
       </p>
 
@@ -29,7 +29,7 @@
             <rect x="1" y="1" width="4" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/>
             <rect x="7" y="1" width="4" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/>
           </svg>
-          Pages
+          Páginas
         </button>
         <button
           @click="emit('mode-change', 'infinite')"
@@ -45,7 +45,7 @@
           <svg class="vtt-w-3 vtt-h-3" fill="none" viewBox="0 0 12 12">
             <path d="M6 1v10M3 8l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Scroll
+          Infinito
         </button>
       </div>
     </div>
@@ -89,7 +89,7 @@
 
     <!-- Right: rows per page -->
     <div class="vtt-flex vtt-items-center vtt-gap-2">
-      <span class="vtt-text-xs vtt-text-neutral-500">Rows:</span>
+      <span class="vtt-text-xs vtt-text-neutral-500">Filas:</span>
       <select
         :value="rowsPerPage"
         @change="emit('rows-per-page', Number(($event.target as HTMLSelectElement).value))"

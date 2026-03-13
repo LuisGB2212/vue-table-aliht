@@ -14,7 +14,7 @@
         <rect x="2" y="7.25" width="9" height="1.5" rx="0.75" fill="currentColor"/>
         <rect x="2" y="11.5" width="6" height="1.5" rx="0.75" fill="currentColor"/>
       </svg>
-      Columns
+      Columnas
       <svg class="vtt-w-3 vtt-h-3 vtt-text-neutral-400 vtt-transition-transform" :class="open ? 'vtt-rotate-180' : ''" fill="none" viewBox="0 0 12 12">
         <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
@@ -29,7 +29,7 @@
         class="vtt-scope vtt-fixed vtt-w-[220px] vtt-bg-white vtt-border vtt-border-neutral-200 vtt-rounded-2xl vtt-shadow-dropdown vtt-z-[9999]"
       >
         <div class="vtt-px-4 vtt-pt-4 vtt-pb-1">
-          <p class="vtt-text-[10px] vtt-font-bold vtt-text-neutral-400 vtt-uppercase vtt-tracking-widest vtt-mb-3">Toggle Columns</p>
+          <p class="vtt-text-[10px] vtt-font-bold vtt-text-neutral-400 vtt-uppercase vtt-tracking-widest vtt-mb-3">Columnas</p>
           <div class="vtt-space-y-0.5">
             <label
               v-for="col in toggleableColumns"
@@ -57,8 +57,8 @@
         </div>
 
         <div class="vtt-flex vtt-items-center vtt-justify-between vtt-px-4 vtt-py-3 vtt-border-t vtt-border-neutral-100 vtt-mt-2 vtt-rounded-b-2xl">
-          <button @click="showAll" class="vtt-text-xs vtt-text-neutral-500 hover:vtt-text-neutral-800 vtt-transition-colors vtt-font-medium">Show all</button>
-          <button @click="open = false" class="vtt-text-xs vtt-font-semibold vtt-bg-neutral-900 vtt-text-white vtt-px-4 vtt-py-1.5 vtt-rounded-lg hover:vtt-bg-neutral-700 vtt-transition-colors">Done</button>
+          <button @click="showAll" class="vtt-text-xs vtt-text-neutral-500 hover:vtt-text-neutral-800 vtt-transition-colors vtt-font-medium">Mostrar todas</button>
+          <button @click="open = false" class="vtt-text-xs vtt-font-semibold vtt-bg-neutral-900 vtt-text-white vtt-px-4 vtt-py-1.5 vtt-rounded-lg hover:vtt-bg-neutral-700 vtt-transition-colors">Listo</button>
         </div>
       </div>
     </Transition>

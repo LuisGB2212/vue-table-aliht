@@ -12,7 +12,7 @@
       <svg class="vtt-w-4 vtt-h-4" fill="none" viewBox="0 0 16 16">
         <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
-      Filter
+      Filtros
       <span v-if="activeCount > 0" class="vtt-bg-neutral-900 vtt-text-white vtt-text-xs vtt-rounded-full vtt-w-4 vtt-h-4 vtt-flex vtt-items-center vtt-justify-center vtt-leading-none vtt-font-semibold">{{ activeCount }}</span>
     </button>
 
@@ -26,7 +26,7 @@
       >
         <!-- Search -->
         <div class="vtt-px-4 vtt-pt-4 vtt-pb-3">
-          <p class="vtt-text-[10px] vtt-font-bold vtt-text-neutral-400 vtt-uppercase vtt-tracking-widest vtt-mb-2.5">Search</p>
+          <p class="vtt-text-[10px] vtt-font-bold vtt-text-neutral-400 vtt-uppercase vtt-tracking-widest vtt-mb-2.5">Buscar</p>
           <div class="vtt-relative">
             <svg class="vtt-absolute vtt-left-3 vtt-top-1/2 -vtt-translate-y-1/2 vtt-w-3.5 vtt-h-3.5 vtt-text-neutral-400 vtt-pointer-events-none" fill="none" viewBox="0 0 14 14">
               <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/>
@@ -36,7 +36,7 @@
               :value="filters.search"
               @input="emit('update:filter', { search: ($event.target as HTMLInputElement).value })"
               type="text"
-              placeholder="Search records..."
+              placeholder="Buscar registros..."
               class="vtt-w-full vtt-text-sm vtt-pl-8 vtt-pr-3 vtt-py-2 vtt-border vtt-border-neutral-200 vtt-rounded-xl vtt-bg-neutral-50 focus:vtt-outline-none focus:vtt-border-neutral-400 focus:vtt-bg-white vtt-transition-all vtt-text-neutral-800 placeholder:vtt-text-neutral-400"
             />
           </div>
@@ -46,7 +46,7 @@
 
         <!-- Status -->
         <div class="vtt-px-4 vtt-py-3">
-          <p class="vtt-text-[10px] vtt-font-bold vtt-text-neutral-400 vtt-uppercase vtt-tracking-widest vtt-mb-2.5">Status</p>
+          <p class="vtt-text-[10px] vtt-font-bold vtt-text-neutral-400 vtt-uppercase vtt-tracking-widest vtt-mb-2.5">Estado</p>
           <div class="vtt-space-y-1">
             <label
               v-for="status in statusOptions"
@@ -75,10 +75,10 @@
 
         <!-- Date Range -->
         <div class="vtt-px-4 vtt-py-3">
-          <p class="vtt-text-[10px] vtt-font-bold vtt-text-neutral-400 vtt-uppercase vtt-tracking-widest vtt-mb-2.5">Date Range</p>
+          <p class="vtt-text-[10px] vtt-font-bold vtt-text-neutral-400 vtt-uppercase vtt-tracking-widest vtt-mb-2.5">Rango de fechas</p>
           <div class="vtt-grid vtt-grid-cols-2 vtt-gap-2">
             <div>
-              <label class="vtt-text-[11px] vtt-text-neutral-500 vtt-mb-1 vtt-block vtt-font-medium">From</label>
+              <label class="vtt-text-[11px] vtt-text-neutral-500 vtt-mb-1 vtt-block vtt-font-medium">Desde</label>
               <input
                 :value="filters.dateFrom"
                 @input="emit('update:filter', { dateFrom: ($event.target as HTMLInputElement).value })"
@@ -87,7 +87,7 @@
               />
             </div>
             <div>
-              <label class="vtt-text-[11px] vtt-text-neutral-500 vtt-mb-1 vtt-block vtt-font-medium">To</label>
+              <label class="vtt-text-[11px] vtt-text-neutral-500 vtt-mb-1 vtt-block vtt-font-medium">Hasta</label>
               <input
                 :value="filters.dateTo"
                 @input="emit('update:filter', { dateTo: ($event.target as HTMLInputElement).value })"
@@ -104,13 +104,13 @@
             @click="onClear"
             class="vtt-text-sm vtt-text-neutral-500 hover:vtt-text-neutral-800 vtt-transition-colors vtt-font-medium"
           >
-            Clear all
+            Limpiar todo
           </button>
           <button
             @click="open = false"
             class="vtt-text-sm vtt-font-semibold vtt-bg-neutral-900 vtt-text-white vtt-px-5 vtt-py-2 vtt-rounded-xl hover:vtt-bg-neutral-700 vtt-transition-colors"
           >
-            Apply
+            Aplicar
           </button>
         </div>
       </div>

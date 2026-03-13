@@ -62,17 +62,17 @@ const allData: DataRow[] = Array.from({ length: 317 }, (_, i) => ({
 
 const sections = ref<SectionDefinition[]>([
   { key: 'all',      title: 'All Transactions', source: { mode: 'local', data: allData } },
-  { key: 'pending',  title: 'Pending', color: 'yellow', source: { mode: 'local', data: allData.filter(t => ['pending-approval','pending-review'].includes(t.status as string)) } },
-  { key: 'approved', title: 'Approved', color: 'green', source: { mode: 'local', data: allData.filter(t => ['approved','finalized'].includes(t.status as string)) } },
+  // { key: 'pending',  title: 'Pending', color: 'yellow', source: { mode: 'local', data: allData.filter(t => ['pending-approval','pending-review'].includes(t.status as string)) } },
+  // { key: 'approved', title: 'Approved', color: 'green', source: { mode: 'local', data: allData.filter(t => ['approved','finalized'].includes(t.status as string)) } },
 ])
 
 const columns = ref<ColumnDefinition[]>([
-  { field: 'date',              label: 'Date',              type: 'date',     sortable: true },
-  { field: 'transactionNumber', label: 'Transaction #',     type: 'text',     sortable: true },
-  { field: 'description',       label: 'Description',       type: 'text',     sortable: true, truncate: true, tooltip: true },
-  { field: 'amount',            label: 'Amount',            type: 'currency', sortable: true, align: 'right' },
-  { field: 'category',          label: 'Category',          type: 'text',     sortable: true },
-  { field: 'status',            label: 'Status',            type: 'status',   sortable: true },
+  { field: 'date',              label: 'Fecha',              type: 'date',     sortable: true },
+  { field: 'transactionNumber', label: 'Transacción #',     type: 'text',     sortable: true },
+  { field: 'description',       label: 'Descripción',       type: 'text',     sortable: true, truncate: true, tooltip: true },
+  { field: 'amount',            label: 'Monto',            type: 'currency', sortable: true, align: 'right' },
+  { field: 'category',          label: 'Categoría',          type: 'text',     sortable: true },
+  { field: 'status',            label: 'Estado',            type: 'status',   sortable: true },
   { field: 'voucher',           label: 'Voucher',           type: 'custom',   sortable: false, visible: false, align: 'center', width: '90px' },
   { type: 'actions',            label: '',                  width: '96px',    align: 'right' },
 ])
