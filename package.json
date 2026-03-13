@@ -12,7 +12,9 @@
     },
     "./style.css": "./dist/style.css"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "concurrently \"tailwindcss -i src/style.dev.css -o src/tailwind.generated.css --watch\" \"vite\"",
     "build": "vue-tsc && vite build",
@@ -20,26 +22,38 @@
     "build:lib": "vite build --mode lib && tailwindcss -i src/style.css -o dist/style.css --minify"
   },
   "peerDependencies": {
-    "vue": "^3.3.0",
-    "pinia": "^2.1.0"
+    "pinia": "^2.1.0",
+    "vue": "^3.3.0"
   },
   "devDependencies": {
+    "@types/sortablejs": "^1.15.9",
     "@vitejs/plugin-vue": "^5.0.0",
     "autoprefixer": "^10.4.19",
     "concurrently": "^9.0.0",
+    "pinia": "^2.1.7",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.0",
     "vite": "^5.2.0",
     "vue": "^3.4.21",
-    "vue-tsc": "^2.0.13",
-    "pinia": "^2.1.7"
+    "vue-tsc": "^2.0.13"
   },
-  "keywords": ["vue", "vue3", "pinia", "transactions", "table", "component", "tailwindcss"],
+  "keywords": [
+    "vue",
+    "vue3",
+    "pinia",
+    "transactions",
+    "table",
+    "component",
+    "tailwindcss"
+  ],
   "author": "",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/LuisGB2212/vue-table-aliht"
+  },
+  "dependencies": {
+    "sortablejs": "^1.15.7"
   }
 }

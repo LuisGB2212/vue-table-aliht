@@ -300,28 +300,32 @@ export const useDataTableStore = defineStore('dataTable', () => {
     else s.selectedIds.add(id)
   }
 
-  function toggleSelectAll(key: string) {
+  function toggleSelectAll(key: string, filter?: (row: DataRow) => boolean) {
     const s = sections.value.get(key)
     if (!s) return
-    const all = s.rows.every(t => s.selectedIds.has(t.id))
-    if (all) s.rows.forEach(t => s.selectedIds.delete(t.id))
-    else     s.rows.forEach(t => s.selectedIds.add(t.id))
+    const selectableRows = filter ? s.rows.filter(filter) : s.rows
+    const all = selectableRows.every(t => s.selectedIds.has(t.id))
+    if (all) selectableRows.forEach(t => s.selectedIds.delete(t.id))
+    else     selectableRows.forEach(t => s.selectedIds.add(t.id))
   }
 
   function clearSelection(key: string) {
     sections.value.get(key)?.selectedIds.clear()
   }
 
-  function isAllSelected(key: string): boolean {
+  function isAllSelected(key: string, filter?: (row: DataRow) => boolean): boolean {
     const s = sections.value.get(key)
     if (!s || s.rows.length === 0) return false
-    return s.rows.every(t => s.selectedIds.has(t.id))
+    const selectableRows = filter ? s.rows.filter(filter) : s.rows
+    if (selectableRows.length === 0) return false
+    return selectableRows.every(t => s.selectedIds.has(t.id))
   }
 
-  function isIndeterminate(key: string): boolean {
+  function isIndeterminate(key: string, filter?: (row: DataRow) => boolean): boolean {
     const s = sections.value.get(key)
     if (!s) return false
-    return s.rows.some(t => s.selectedIds.has(t.id)) && !isAllSelected(key)
+    const selectableRows = filter ? s.rows.filter(filter) : s.rows
+    return selectableRows.some(t => s.selectedIds.has(t.id)) && !isAllSelected(key, filter)
   }
 
   function getSelectedRows(key: string): DataRow[] {

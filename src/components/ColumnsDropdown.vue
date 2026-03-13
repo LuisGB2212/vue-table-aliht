@@ -30,12 +30,19 @@
       >
         <div class="vtt-px-4 vtt-pt-4 vtt-pb-1">
           <p class="vtt-text-[10px] vtt-font-bold vtt-text-neutral-400 vtt-uppercase vtt-tracking-widest vtt-mb-3">Columnas</p>
-          <div class="vtt-space-y-0.5">
+          <div class="vtt-space-y-0.5" ref="listRef">
             <label
               v-for="col in toggleableColumns"
               :key="colKey(col)"
               class="vtt-flex vtt-items-center vtt-gap-2.5 vtt-cursor-pointer vtt-py-1.5 vtt-px-1.5 vtt-rounded-lg hover:vtt-bg-neutral-50 vtt-transition-colors vtt-group vtt-select-none"
             >
+              <!-- Drag handle -->
+              <div class="vtt-drag-handle vtt-cursor-grab active:vtt-cursor-grabbing vtt-text-neutral-300 hover:vtt-text-neutral-500 vtt-transition-colors">
+                <svg class="vtt-w-3.5 vtt-h-3.5" fill="none" viewBox="0 0 16 16">
+                  <path d="M5 4h1.5v1.5H5V4zm4.5 0H11v1.5H9.5V4zm-4.5 4h1.5v1.5H5V8zm4.5 0H11v1.5H9.5V8zm-4.5 4h1.5v1.5H5V12zm4.5 0H11v1.5H9.5V12z" fill="currentColor"/>
+                </svg>
+              </div>
+
               <div
                 :class="[
                   'vtt-w-4 vtt-h-4 vtt-rounded vtt-border vtt-flex vtt-items-center vtt-justify-center vtt-flex-shrink-0 vtt-transition-all',
@@ -67,7 +74,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import Sortable from 'sortablejs'
 import type { ColumnDefinition, DataColumn } from '../types'
 
 const props = defineProps<{ columns: ColumnDefinition[] }>()
@@ -76,7 +84,34 @@ const emit = defineEmits<{ (e: 'update:columns', cols: ColumnDefinition[]): void
 const open         = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
 const panelRef     = ref<HTMLElement | null>(null)
+const listRef      = ref<HTMLElement | null>(null)
 const panelStyle   = ref<Record<string, string>>({})
+
+function initSortable() {
+  if (!listRef.value) return
+  Sortable.create(listRef.value, {
+    animation: 150,
+    handle: '.vtt-drag-handle',
+    ghostClass: 'vtt-bg-neutral-50',
+    onEnd: (evt: Sortable.SortableEvent) => {
+      const { oldIndex, newIndex } = evt
+      if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) return
+
+      const toggles = [...toggleableColumns.value]
+      const [moved] = toggles.splice(oldIndex, 1)
+      toggles.splice(newIndex, 0, moved)
+
+      const actions = props.columns.filter(c => c.type === 'actions')
+      emit('update:columns', [...toggles, ...actions])
+    }
+  })
+}
+
+watch(open, (isOpen) => {
+  if (isOpen) {
+    nextTick(() => initSortable())
+  }
+})
 
 function updatePosition() {
   const el = containerRef.value

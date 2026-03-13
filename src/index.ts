@@ -42,7 +42,7 @@ export {
   ActionMenu,
   useDataTableStore,
   // Legacy alias
-  DataTable as TransactionsTable,
+  // DataTable as TransactionsTable,
   useDataTableStore as useTransactionsStore,
 }
 
@@ -52,8 +52,8 @@ export default {
       const pinia = options?.pinia ?? createPinia()
       app.use(pinia)
     }
-    app.component('DataTable', DataTable)
-    app.component('TransactionsTable', DataTable) // legacy alias
+    app.component('DataTableCorporative', DataTable)
+    // app.component('TransactionsTable', DataTable) // legacy alias
     app.component('StatusBadge', StatusBadge)
     app.component('TablePagination', TablePagination)
     app.component('FilterDropdown', FilterDropdown)

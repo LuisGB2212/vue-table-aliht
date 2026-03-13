@@ -171,6 +171,12 @@ export interface DataTableProps {
   createButtonLabel?: string
   currency?: string
   locale?: string
+  /** Unique ID to persist table settings to localStorage. If omitted, persistence is disabled. */
+  storageId?: string
+  /** Whether to show the selection column. Default true. */
+  selectable?: boolean
+  /** Optional function to determine if a row is selectable. */
+  isRowSelectable?: (row: DataRow) => boolean
 }
 
 // Legacy compat alias

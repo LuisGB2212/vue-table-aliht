@@ -201,10 +201,12 @@
           <div class="vtt-flex vtt-items-center vtt-gap-3 vtt-px-4 vtt-py-3.5 vtt-cursor-pointer"
             @click="toggleCard(row.id)">
             <!-- Checkbox -->
-            <div @click.stop>
+            <div v-if="selectable" @click.stop>
               <input type="checkbox" :checked="activeState.selectedIds.has(row.id)"
+                :disabled="isRowSelectable && !isRowSelectable(row)"
                 @change="store.toggleSelect(store.activeKey, row.id)"
-                class="vtt-w-4 vtt-h-4 vtt-rounded vtt-border-neutral-300 vtt-cursor-pointer" />
+                class="vtt-w-4 vtt-h-4 vtt-rounded vtt-border-neutral-300"
+                :class="(isRowSelectable && !isRowSelectable(row)) ? 'vtt-cursor-not-allowed vtt-opacity-50' : 'vtt-cursor-pointer'" />
             </div>
 
             <!-- Leading content: first two visible data columns -->
@@ -317,9 +319,9 @@
       <table class="vtt-w-full vtt-text-sm vtt-border-collapse">
         <thead class="vtt-sticky vtt-top-0 vtt-z-10 vtt-bg-white">
           <tr class="vtt-border-b vtt-border-neutral-100">
-            <th class="vtt-w-10 vtt-px-4 vtt-py-3">
-              <input type="checkbox" :checked="store.isAllSelected(store.activeKey)"
-                :indeterminate="store.isIndeterminate(store.activeKey)" @change="store.toggleSelectAll(store.activeKey)"
+            <th v-if="selectable" class="vtt-w-10 vtt-px-4 vtt-py-3">
+              <input type="checkbox" :checked="store.isAllSelected(store.activeKey, isRowSelectable)"
+                :indeterminate="store.isIndeterminate(store.activeKey, isRowSelectable)" @change="store.toggleSelectAll(store.activeKey, isRowSelectable)"
                 class="vtt-w-4 vtt-h-4 vtt-rounded vtt-border-neutral-300 vtt-text-neutral-900 focus:vtt-ring-neutral-500 vtt-cursor-pointer" />
             </th>
             <th v-for="col in visibleColumns" :key="colKey(col)"
@@ -353,7 +355,7 @@
         <tbody>
           <template v-if="activeState?.loading">
             <tr v-for="n in activeState.pagination.rowsPerPage" :key="n" class="vtt-border-b vtt-border-neutral-50">
-              <td class="vtt-px-4 vtt-py-3">
+              <td v-if="selectable" class="vtt-px-4 vtt-py-3">
                 <div class="vtt-w-4 vtt-h-4 vtt-bg-neutral-100 vtt-rounded vtt-animate-pulse" />
               </td>
               <td v-for="col in visibleColumns" :key="colKey(col)" class="vtt-px-4 vtt-py-3">
@@ -365,7 +367,7 @@
 
           <template v-else-if="!activeState?.rows.length">
             <tr>
-              <td :colspan="visibleColumns.length + 1" class="vtt-px-4 vtt-py-16 vtt-text-center">
+              <td :colspan="visibleColumns.length + (selectable ? 1 : 0)" class="vtt-px-4 vtt-py-16 vtt-text-center">
                 <div class="vtt-flex vtt-flex-col vtt-items-center vtt-gap-3">
                   <div
                     class="vtt-w-12 vtt-h-12 vtt-rounded-full vtt-bg-neutral-100 vtt-flex vtt-items-center vtt-justify-center">
@@ -387,10 +389,12 @@
               'vtt-border-b vtt-border-neutral-50 vtt-transition-colors vtt-cursor-pointer vtt-group',
               activeState.selectedIds.has(row.id) ? 'vtt-bg-neutral-50' : 'hover:vtt-bg-neutral-50/70'
             ]" @click="emit('row-click', row)">
-              <td class="vtt-px-4 vtt-py-3.5" @click.stop>
+              <td v-if="selectable" class="vtt-px-4 vtt-py-3.5" @click.stop>
                 <input type="checkbox" :checked="activeState.selectedIds.has(row.id)"
+                  :disabled="isRowSelectable && !isRowSelectable(row)"
                   @change="store.toggleSelect(store.activeKey, row.id)"
-                  class="vtt-w-4 vtt-h-4 vtt-rounded vtt-border-neutral-300 vtt-text-neutral-900 focus:vtt-ring-neutral-500 vtt-cursor-pointer" />
+                  class="vtt-w-4 vtt-h-4 vtt-rounded vtt-border-neutral-300 vtt-text-neutral-900 focus:vtt-ring-neutral-500"
+                  :class="(isRowSelectable && !isRowSelectable(row)) ? 'vtt-cursor-not-allowed vtt-opacity-50' : 'vtt-cursor-pointer'" />
               </td>
               <td v-for="col in visibleColumns" :key="colKey(col)" :style="colStyle(col)" :class="[
                 'vtt-px-4 vtt-py-3.5',
@@ -491,6 +495,8 @@ const props = withDefaults(defineProps<DataTableProps>(), {
   currency: 'USD',
   locale: 'es-MX',
   displayMode: 'paginated',
+  storageId: '',
+  selectable: true,
 })
 
 const emit = defineEmits<{
@@ -676,6 +682,99 @@ watch(
   () => activeState.value?.selectedIds.size,
   () => { if (activeState.value) emit('selection-change', store.getSelectedRows(store.activeKey)) }
 )
+
+// ── Persistence ───────────────────────────────────────
+const STORAGE_KEY = computed(() => props.storageId ? `vtt-table-${props.storageId}` : null)
+
+function saveSettings() {
+  if (!STORAGE_KEY.value) return
+  const settings = {
+    displayMode: currentMode.value,
+    columns: localColumns.value.map(c => ({
+      ...c,
+      format: undefined // Cannot serialize functions
+    })),
+    sections: {} as Record<string, any>
+  }
+
+  store.sectionList.forEach(s => {
+    settings.sections[s.definition.key] = {
+      filters: s.filters,
+      rowsPerPage: s.pagination.rowsPerPage,
+      sort: s.sort
+    }
+  })
+
+  localStorage.setItem(STORAGE_KEY.value, JSON.stringify(settings))
+}
+
+function loadSettings() {
+  if (!STORAGE_KEY.value) return
+  const saved = localStorage.getItem(STORAGE_KEY.value)
+  if (!saved) return
+
+  try {
+    const settings = JSON.parse(saved)
+    if (settings.displayMode) {
+      currentMode.value = settings.displayMode
+      store.setDisplayMode(settings.displayMode)
+    }
+
+    if (settings.columns) {
+      // Merge saved visibility/order with current props.columns to keep format functions
+      const merged = settings.columns.map((savedCol: any) => {
+        const found = props.columns.find(c => colKey(c) === colKey(savedCol))
+        if (found) {
+          return { ...found, visible: savedCol.visible }
+        }
+        return null
+      }).filter(Boolean)
+
+      // Add any new columns from props that weren't in saved settings
+      props.columns.forEach(c => {
+        if (!merged.find((m: any) => colKey(m) === colKey(c))) {
+          merged.push(c)
+        }
+      })
+      localColumns.value = merged
+    }
+
+    if (settings.sections) {
+      Object.keys(settings.sections).forEach(key => {
+        const s = settings.sections[key]
+        if (s.filters) store.setFilter(key, s.filters)
+        if (s.rowsPerPage) store.setRowsPerPage(key, s.rowsPerPage)
+        if (s.sort && s.sort.field) {
+            // A bit hacky since store sort is toggle-based, but we can set it
+            const section = store.sections.get(key)
+            if (section) {
+                section.sort = s.sort
+                store.refresh(key)
+            }
+        }
+      })
+    }
+  } catch (e) {
+    console.error('[DataTable] Error loading persisted settings:', e)
+  }
+}
+
+onMounted(() => {
+  if (props.storageId) {
+    loadSettings()
+  }
+})
+
+// Watch for changes to save (debounced manually or just watch deep)
+watch([currentMode, localColumns], saveSettings, { deep: true })
+// Watch store for filters/pagination changes per section
+watch(() => store.sectionList.map(s => ({
+  key: s.definition.key,
+  filters: s.filters,
+  rowsPerPage: s.pagination.rowsPerPage,
+  sort: s.sort
+})), saveSettings, { deep: true })
+
 </script>
 
 <style scoped>
