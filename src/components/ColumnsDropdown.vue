@@ -24,6 +24,7 @@
     <Transition name="dropdown">
       <div
         v-if="open"
+        ref="panelRef"
         :style="panelStyle"
         class="vtt-scope vtt-fixed vtt-w-[220px] vtt-bg-white vtt-border vtt-border-neutral-200 vtt-rounded-2xl vtt-shadow-dropdown vtt-z-[9999]"
       >
@@ -74,6 +75,7 @@ const emit = defineEmits<{ (e: 'update:columns', cols: ColumnDefinition[]): void
 
 const open         = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
+const panelRef     = ref<HTMLElement | null>(null)
 const panelStyle   = ref<Record<string, string>>({})
 
 function updatePosition() {
@@ -118,7 +120,10 @@ function showAll() {
 
 function handleOutside(e: MouseEvent) {
   if (!open.value) return
-  if (containerRef.value && !containerRef.value.contains(e.target as Node)) {
+  const target = e.target as Node
+  const insideTrigger = containerRef.value?.contains(target)
+  const insidePanel   = panelRef.value?.contains(target)
+  if (!insideTrigger && !insidePanel) {
     open.value = false
   }
 }
