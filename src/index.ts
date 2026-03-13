@@ -10,11 +10,17 @@ export type {
   Transaction,
   TransactionStatus,
   TransactionCategory,
-  TransactionTab,
-  PaginationState,
-  SortState,
   TransactionFilter,
+  SortState,
+  PaginationState,
+  SectionDefinition,
+  SectionLocal,
+  SectionApi,
+  SectionState,
+  ApiPaginatedResponse,
+  ApiQueryParams,
   TransactionsTableProps,
+  TransactionTab,
 } from './types'
 
 export {
@@ -25,16 +31,12 @@ export {
   useTransactionsStore,
 }
 
-// Vue plugin: registers components globally + installs Pinia if not present
 export default {
   install(app: App, options?: { pinia?: ReturnType<typeof createPinia> }) {
-    // Install Pinia if not already installed
     if (!app.config.globalProperties.$pinia) {
       const pinia = options?.pinia ?? createPinia()
       app.use(pinia)
     }
-
-    // Register components globally
     app.component('TransactionsTable', TransactionsTable)
     app.component('StatusBadge', StatusBadge)
     app.component('TablePagination', TablePagination)

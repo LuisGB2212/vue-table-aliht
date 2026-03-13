@@ -2,253 +2,374 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type {
   Transaction,
-  PaginationState,
-  SortState,
+  SectionDefinition,
+  SectionState,
   TransactionFilter,
+  SortState,
+  PaginationState,
+  ApiPaginatedResponse,
+  ApiQueryParams,
   TransactionStatus,
 } from '../types'
 
+// ─────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────
+
+function defaultPagination(): PaginationState {
+  return { currentPage: 1, rowsPerPage: 10, total: 0, totalPages: 0 }
+}
+
+function defaultSort(): SortState {
+  return { field: null, direction: 'asc' }
+}
+
+function defaultFilters(): TransactionFilter {
+  return { search: '', status: [], category: [], dateFrom: '', dateTo: '' }
+}
+
+function applyLocalFilters(data: Transaction[], filters: TransactionFilter, sort: SortState): Transaction[] {
+  let result = [...data]
+
+  if (filters.search) {
+    const q = filters.search.toLowerCase()
+    result = result.filter(t =>
+      t.description.toLowerCase().includes(q) ||
+      t.transactionNumber.toLowerCase().includes(q) ||
+      t.category.toLowerCase().includes(q),
+    )
+  }
+  if (filters.status?.length) {
+    result = result.filter(t => filters.status!.includes(t.status))
+  }
+  if (filters.category?.length) {
+    result = result.filter(t => filters.category!.includes(t.category))
+  }
+  if (filters.dateFrom) result = result.filter(t => t.date >= filters.dateFrom!)
+  if (filters.dateTo)   result = result.filter(t => t.date <= filters.dateTo!)
+
+  if (sort.field) {
+    const f = sort.field
+    result.sort((a, b) => {
+      let av: unknown = a[f]
+      let bv: unknown = b[f]
+      if (typeof av === 'string') av = av.toLowerCase()
+      if (typeof bv === 'string') bv = bv.toLowerCase()
+      if (av === bv) return 0
+      const cmp = av! < bv! ? -1 : 1
+      return sort.direction === 'asc' ? cmp : -cmp
+    })
+  }
+  return result
+}
+
+function buildQueryString(params: ApiQueryParams): string {
+  const q = new URLSearchParams()
+  q.set('page', String(params.page))
+  q.set('perPage', String(params.perPage))
+  if (params.search)    q.set('search', params.search)
+  if (params.status)    q.set('status', params.status)
+  if (params.category)  q.set('category', params.category)
+  if (params.dateFrom)  q.set('dateFrom', params.dateFrom)
+  if (params.dateTo)    q.set('dateTo', params.dateTo)
+  if (params.sortField) q.set('sortField', params.sortField)
+  if (params.sortDir)   q.set('sortDir', params.sortDir)
+  return q.toString()
+}
+
+// ─────────────────────────────────────────────
+// Store
+// ─────────────────────────────────────────────
 export const useTransactionsStore = defineStore('transactions', () => {
-  // --- State ---
-  const allTransactions = ref<Transaction[]>([])
-  const selectedIds = ref<Set<string | number>>(new Set())
-  const activeTab = ref<string>('all')
-  const loading = ref(false)
 
-  const pagination = ref<PaginationState>({
-    currentPage: 1,
-    rowsPerPage: 10,
-    totalItems: 0,
-  })
+  // Map of sectionKey → SectionState
+  const sections = ref<Map<string, SectionState>>(new Map())
+  const activeKey = ref<string>('')
 
-  const sort = ref<SortState>({
-    field: null,
-    direction: 'asc',
-  })
+  // ── Getters ──────────────────────────────────
 
-  const filters = ref<TransactionFilter>({
-    status: [],
-    category: [],
-    dateFrom: '',
-    dateTo: '',
-    search: '',
-  })
-
-  // --- Getters ---
-  const filteredByTab = computed(() => {
-    if (activeTab.value === 'all') return allTransactions.value
-    if (activeTab.value === 'pending-review')
-      return allTransactions.value.filter((t) => t.status === 'pending-review')
-    if (activeTab.value === 'pending-approval')
-      return allTransactions.value.filter((t) => t.status === 'pending-approval')
-    if (activeTab.value === 'approved')
-      return allTransactions.value.filter((t) => t.status === 'approved')
-    return allTransactions.value.filter((t) => t.status === activeTab.value)
-  })
-
-  const filteredTransactions = computed(() => {
-    let result = [...filteredByTab.value]
-
-    if (filters.value.search) {
-      const q = filters.value.search.toLowerCase()
-      result = result.filter(
-        (t) =>
-          t.description.toLowerCase().includes(q) ||
-          t.transactionNumber.toLowerCase().includes(q) ||
-          t.category.toLowerCase().includes(q),
-      )
-    }
-
-    if (filters.value.status && filters.value.status.length > 0) {
-      result = result.filter((t) => filters.value.status!.includes(t.status))
-    }
-
-    if (filters.value.category && filters.value.category.length > 0) {
-      result = result.filter((t) => filters.value.category!.includes(t.category))
-    }
-
-    if (filters.value.dateFrom) {
-      result = result.filter((t) => t.date >= filters.value.dateFrom!)
-    }
-
-    if (filters.value.dateTo) {
-      result = result.filter((t) => t.date <= filters.value.dateTo!)
-    }
-
-    if (sort.value.field) {
-      const field = sort.value.field
-      result.sort((a, b) => {
-        let av = a[field]
-        let bv = b[field]
-        if (typeof av === 'string') av = av.toLowerCase()
-        if (typeof bv === 'string') bv = bv.toLowerCase()
-        if (av < bv) return sort.value.direction === 'asc' ? -1 : 1
-        if (av > bv) return sort.value.direction === 'asc' ? 1 : -1
-        return 0
-      })
-    }
-
-    return result
-  })
-
-  const paginatedTransactions = computed(() => {
-    const start = (pagination.value.currentPage - 1) * pagination.value.rowsPerPage
-    const end = start + pagination.value.rowsPerPage
-    return filteredTransactions.value.slice(start, end)
-  })
-
-  const totalPages = computed(() =>
-    Math.ceil(filteredTransactions.value.length / pagination.value.rowsPerPage),
+  const activeSection = computed<SectionState | undefined>(
+    () => sections.value.get(activeKey.value),
   )
 
-  const isAllSelected = computed(
-    () =>
-      paginatedTransactions.value.length > 0 &&
-      paginatedTransactions.value.every((t) => selectedIds.value.has(t.id)),
-  )
+  const sectionList = computed(() => Array.from(sections.value.values()))
 
-  const isIndeterminate = computed(
-    () =>
-      paginatedTransactions.value.some((t) => selectedIds.value.has(t.id)) &&
-      !isAllSelected.value,
-  )
+  // ── Internal: create a blank section state ────
 
-  const tabCounts = computed(() => ({
-    all: allTransactions.value.length,
-    'pending-review': allTransactions.value.filter((t) => t.status === 'pending-review').length,
-    'pending-approval': allTransactions.value.filter((t) => t.status === 'pending-approval')
-      .length,
-    approved: allTransactions.value.filter((t) => t.status === 'approved').length,
-  }))
-
-  const selectedTransactions = computed(() =>
-    allTransactions.value.filter((t) => selectedIds.value.has(t.id)),
-  )
-
-  const uniqueCategories = computed(() => [
-    ...new Set(allTransactions.value.map((t) => t.category)),
-  ])
-
-  // --- Actions ---
-  function setTransactions(data: Transaction[]) {
-    allTransactions.value = data
-    pagination.value.totalItems = data.length
-    pagination.value.currentPage = 1
+  function _createState(def: SectionDefinition): SectionState {
+    return {
+      definition: def,
+      rows: [],
+      loading: false,
+      error: null,
+      pagination: defaultPagination(),
+      sort: defaultSort(),
+      filters: defaultFilters(),
+      selectedIds: new Set(),
+      filteredRows: [],
+    }
   }
 
-  function setLoading(val: boolean) {
-    loading.value = val
+  // ── Init ──────────────────────────────────────
+
+  function initSections(defs: SectionDefinition[]) {
+    // Keep existing states if keys match (avoids resetting on re-render)
+    const next = new Map<string, SectionState>()
+    for (const def of defs) {
+      const existing = sections.value.get(def.key)
+      if (existing) {
+        existing.definition = def
+        next.set(def.key, existing)
+      } else {
+        next.set(def.key, _createState(def))
+      }
+    }
+    sections.value = next
+
+    // Set active to first section if not set or key no longer exists
+    if (!activeKey.value || !next.has(activeKey.value)) {
+      activeKey.value = defs[0]?.key ?? ''
+    }
+
+    // Load initial data for all sections
+    for (const def of defs) {
+      loadSection(def.key)
+    }
   }
 
-  function setActiveTab(tab: string) {
-    activeTab.value = tab
-    pagination.value.currentPage = 1
-    selectedIds.value.clear()
-  }
+  // ── Load data ─────────────────────────────────
 
-  function toggleSelect(id: string | number) {
-    if (selectedIds.value.has(id)) {
-      selectedIds.value.delete(id)
+  async function loadSection(key: string) {
+    const s = sections.value.get(key)
+    if (!s) return
+
+    if (s.definition.source.mode === 'local') {
+      _applyLocal(s)
     } else {
-      selectedIds.value.add(id)
+      await _fetchApi(s)
     }
   }
 
-  function toggleSelectAll() {
-    if (isAllSelected.value) {
-      paginatedTransactions.value.forEach((t) => selectedIds.value.delete(t.id))
+  function _applyLocal(s: SectionState) {
+    const all = (s.definition.source as { mode: 'local'; data: Transaction[] }).data
+    s.filteredRows = applyLocalFilters(all, s.filters, s.sort)
+    s.pagination.total = s.filteredRows.length
+    s.pagination.totalPages = Math.ceil(s.filteredRows.length / s.pagination.rowsPerPage)
+    // Clamp page
+    if (s.pagination.currentPage > s.pagination.totalPages) s.pagination.currentPage = 1
+
+    const start = (s.pagination.currentPage - 1) * s.pagination.rowsPerPage
+    s.rows = s.filteredRows.slice(start, start + s.pagination.rowsPerPage)
+    s.loading = false
+    s.error = null
+  }
+
+  async function _fetchApi(s: SectionState) {
+    const src = s.definition.source as { mode: 'api'; endpoint: string; headers?: Record<string, string>; transform?: (r: unknown) => ApiPaginatedResponse }
+
+    const params: ApiQueryParams = {
+      page:      s.pagination.currentPage,
+      perPage:   s.pagination.rowsPerPage,
+      search:    s.filters.search,
+      status:    s.filters.status?.join(','),
+      category:  s.filters.category?.join(','),
+      dateFrom:  s.filters.dateFrom,
+      dateTo:    s.filters.dateTo,
+      sortField: s.sort.field ?? undefined,
+      sortDir:   s.sort.direction,
+    }
+
+    const url = `${src.endpoint}?${buildQueryString(params)}`
+
+    s.loading = true
+    s.error = null
+
+    try {
+      const res = await fetch(url, { headers: src.headers ?? {} })
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+      const raw = await res.json()
+
+      // Use transform if provided, otherwise expect standard ApiPaginatedResponse shape
+      const parsed: ApiPaginatedResponse = src.transform ? src.transform(raw) : raw
+
+      s.rows = parsed.data
+      s.pagination.total = parsed.pagination.total
+      s.pagination.totalPages = parsed.pagination.totalPages
+      s.pagination.currentPage = parsed.pagination.page
+      s.pagination.rowsPerPage = parsed.pagination.perPage
+      s.filteredRows = parsed.data
+      s.error = null
+    } catch (err) {
+      s.error = err instanceof Error ? err.message : 'Unknown error'
+      s.rows = []
+    } finally {
+      s.loading = false
+    }
+  }
+
+  // ── Navigation ────────────────────────────────
+
+  function setActiveSection(key: string) {
+    if (!sections.value.has(key)) return
+    activeKey.value = key
+    // Lazy load if no rows yet
+    const s = sections.value.get(key)!
+    if (s.rows.length === 0 && !s.loading) loadSection(key)
+  }
+
+  // ── Pagination ────────────────────────────────
+
+  function setPage(key: string, page: number) {
+    const s = sections.value.get(key)
+    if (!s) return
+    s.pagination.currentPage = page
+    loadSection(key)
+  }
+
+  function setRowsPerPage(key: string, rows: number) {
+    const s = sections.value.get(key)
+    if (!s) return
+    s.pagination.rowsPerPage = rows
+    s.pagination.currentPage = 1
+    loadSection(key)
+  }
+
+  // ── Sort ──────────────────────────────────────
+
+  function setSort(key: string, field: string) {
+    const s = sections.value.get(key)
+    if (!s) return
+    if (s.sort.field === field) {
+      s.sort.direction = s.sort.direction === 'asc' ? 'desc' : 'asc'
     } else {
-      paginatedTransactions.value.forEach((t) => selectedIds.value.add(t.id))
+      s.sort.field = field
+      s.sort.direction = 'asc'
     }
+    s.pagination.currentPage = 1
+    loadSection(key)
   }
 
-  function clearSelection() {
-    selectedIds.value.clear()
+  // ── Filters ───────────────────────────────────
+
+  function setFilter(key: string, newFilters: Partial<TransactionFilter>) {
+    const s = sections.value.get(key)
+    if (!s) return
+    s.filters = { ...s.filters, ...newFilters }
+    s.pagination.currentPage = 1
+    loadSection(key)
   }
 
-  function setPage(page: number) {
-    pagination.value.currentPage = page
+  function resetFilters(key: string) {
+    const s = sections.value.get(key)
+    if (!s) return
+    s.filters = defaultFilters()
+    s.pagination.currentPage = 1
+    loadSection(key)
   }
 
-  function setRowsPerPage(rows: number) {
-    pagination.value.rowsPerPage = rows
-    pagination.value.currentPage = 1
+  // ── Selection ─────────────────────────────────
+
+  function toggleSelect(key: string, id: string | number) {
+    const s = sections.value.get(key)
+    if (!s) return
+    if (s.selectedIds.has(id)) s.selectedIds.delete(id)
+    else s.selectedIds.add(id)
   }
 
-  function setSort(field: keyof Transaction) {
-    if (sort.value.field === field) {
-      sort.value.direction = sort.value.direction === 'asc' ? 'desc' : 'asc'
-    } else {
-      sort.value.field = field
-      sort.value.direction = 'asc'
-    }
+  function toggleSelectAll(key: string) {
+    const s = sections.value.get(key)
+    if (!s) return
+    const allSelected = s.rows.every(t => s.selectedIds.has(t.id))
+    if (allSelected) s.rows.forEach(t => s.selectedIds.delete(t.id))
+    else s.rows.forEach(t => s.selectedIds.add(t.id))
   }
 
-  function setFilter(newFilters: Partial<TransactionFilter>) {
-    filters.value = { ...filters.value, ...newFilters }
-    pagination.value.currentPage = 1
+  function clearSelection(key: string) {
+    sections.value.get(key)?.selectedIds.clear()
   }
 
-  function resetFilters() {
-    filters.value = { status: [], category: [], dateFrom: '', dateTo: '', search: '' }
-    pagination.value.currentPage = 1
+  // Helpers for template
+  function isAllSelected(key: string): boolean {
+    const s = sections.value.get(key)
+    if (!s || s.rows.length === 0) return false
+    return s.rows.every(t => s.selectedIds.has(t.id))
   }
 
-  function addTransaction(transaction: Transaction) {
-    allTransactions.value.unshift(transaction)
-    pagination.value.totalItems = allTransactions.value.length
+  function isIndeterminate(key: string): boolean {
+    const s = sections.value.get(key)
+    if (!s) return false
+    return s.rows.some(t => s.selectedIds.has(t.id)) && !isAllSelected(key)
   }
 
-  function updateTransaction(id: string | number, updates: Partial<Transaction>) {
-    const idx = allTransactions.value.findIndex((t) => t.id === id)
-    if (idx !== -1) {
-      allTransactions.value[idx] = { ...allTransactions.value[idx], ...updates }
-    }
+  function getSelectedTransactions(key: string): Transaction[] {
+    const s = sections.value.get(key)
+    if (!s) return []
+    return s.rows.filter(t => s.selectedIds.has(t.id))
   }
 
-  function deleteTransaction(id: string | number) {
-    allTransactions.value = allTransactions.value.filter((t) => t.id !== id)
-    pagination.value.totalItems = allTransactions.value.length
-    selectedIds.value.delete(id)
+  // ── CRUD ──────────────────────────────────────
+
+  function addTransaction(key: string, tx: Transaction) {
+    const s = sections.value.get(key)
+    if (!s || s.definition.source.mode !== 'local') return
+    ;(s.definition.source as { mode: 'local'; data: Transaction[] }).data.unshift(tx)
+    _applyLocal(s)
   }
 
-  function updateStatus(id: string | number, status: TransactionStatus) {
-    updateTransaction(id, { status })
+  function updateTransaction(key: string, id: string | number, updates: Partial<Transaction>) {
+    const s = sections.value.get(key)
+    if (!s || s.definition.source.mode !== 'local') return
+    const arr = (s.definition.source as { mode: 'local'; data: Transaction[] }).data
+    const idx = arr.findIndex(t => t.id === id)
+    if (idx !== -1) arr[idx] = { ...arr[idx], ...updates }
+    _applyLocal(s)
+  }
+
+  function deleteTransaction(key: string, id: string | number) {
+    const s = sections.value.get(key)
+    if (!s || s.definition.source.mode !== 'local') return
+    const src = s.definition.source as { mode: 'local'; data: Transaction[] }
+    src.data = src.data.filter(t => t.id !== id)
+    s.selectedIds.delete(id)
+    _applyLocal(s)
+  }
+
+  function updateStatus(key: string, id: string | number, status: TransactionStatus) {
+    updateTransaction(key, id, { status })
+  }
+
+  // ── Refresh (API) ─────────────────────────────
+
+  function refresh(key: string) {
+    loadSection(key)
   }
 
   return {
     // State
-    allTransactions,
-    selectedIds,
-    activeTab,
-    loading,
-    pagination,
-    sort,
-    filters,
+    sections,
+    activeKey,
     // Getters
-    filteredTransactions,
-    paginatedTransactions,
-    totalPages,
-    isAllSelected,
-    isIndeterminate,
-    tabCounts,
-    selectedTransactions,
-    uniqueCategories,
+    activeSection,
+    sectionList,
     // Actions
-    setTransactions,
-    setLoading,
-    setActiveTab,
-    toggleSelect,
-    toggleSelectAll,
-    clearSelection,
+    initSections,
+    loadSection,
+    setActiveSection,
     setPage,
     setRowsPerPage,
     setSort,
     setFilter,
     resetFilters,
+    toggleSelect,
+    toggleSelectAll,
+    clearSelection,
+    isAllSelected,
+    isIndeterminate,
+    getSelectedTransactions,
     addTransaction,
     updateTransaction,
     deleteTransaction,
     updateStatus,
+    refresh,
   }
 })
