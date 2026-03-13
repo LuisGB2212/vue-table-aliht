@@ -293,9 +293,15 @@ export const useDataTableStore = defineStore('dataTable', () => {
   }
 
   // ── Selection ─────────────────────────────────
-  function toggleSelect(key: string, id: string | number) {
+  function toggleSelect(key: string, id: string | number, filter?: (row: DataRow) => boolean) {
     const s = sections.value.get(key)
     if (!s) return
+    
+    if (filter) {
+      const row = s.rows.find(r => r.id === id)
+      if (row && !filter(row)) return
+    }
+
     if (s.selectedIds.has(id)) s.selectedIds.delete(id)
     else s.selectedIds.add(id)
   }

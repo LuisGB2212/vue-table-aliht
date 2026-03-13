@@ -204,7 +204,7 @@
             <div v-if="selectable" @click.stop>
               <input type="checkbox" :checked="activeState.selectedIds.has(row.id)"
                 :disabled="isRowSelectable && !isRowSelectable(row)"
-                @change="store.toggleSelect(store.activeKey, row.id)"
+                @change="handleToggleSelect(row)"
                 class="vtt-w-4 vtt-h-4 vtt-rounded vtt-border-neutral-300"
                 :class="(isRowSelectable && !isRowSelectable(row)) ? 'vtt-cursor-not-allowed vtt-opacity-50' : 'vtt-cursor-pointer'" />
             </div>
@@ -254,7 +254,7 @@
                   class="vtt-rounded-xl vtt-bg-neutral-50 vtt-border vtt-border-neutral-100 vtt-divide-y vtt-divide-neutral-100">
 
                   <!-- All visible data columns except primary, secondary, badge (already shown) -->
-                  <div v-for="col in detailColumns(row)" :key="colKey(col)"
+                  <div v-for="col in detailColumns()" :key="colKey(col)"
                     class="vtt-flex vtt-items-center vtt-justify-between vtt-px-3 vtt-py-2.5 vtt-gap-4">
                     <span
                       class="vtt-text-xs vtt-font-semibold vtt-text-neutral-400 vtt-uppercase vtt-tracking-wider vtt-flex-shrink-0">
@@ -321,7 +321,7 @@
           <tr class="vtt-border-b vtt-border-neutral-100">
             <th v-if="selectable" class="vtt-w-10 vtt-px-4 vtt-py-3">
               <input type="checkbox" :checked="store.isAllSelected(store.activeKey, isRowSelectable)"
-                :indeterminate="store.isIndeterminate(store.activeKey, isRowSelectable)" @change="store.toggleSelectAll(store.activeKey, isRowSelectable)"
+                :indeterminate="store.isIndeterminate(store.activeKey, isRowSelectable)" @change="handleToggleSelectAll"
                 class="vtt-w-4 vtt-h-4 vtt-rounded vtt-border-neutral-300 vtt-text-neutral-900 focus:vtt-ring-neutral-500 vtt-cursor-pointer" />
             </th>
             <th v-for="col in visibleColumns" :key="colKey(col)"
@@ -392,7 +392,7 @@
               <td v-if="selectable" class="vtt-px-4 vtt-py-3.5" @click.stop>
                 <input type="checkbox" :checked="activeState.selectedIds.has(row.id)"
                   :disabled="isRowSelectable && !isRowSelectable(row)"
-                  @change="store.toggleSelect(store.activeKey, row.id)"
+                  @change="handleToggleSelect(row)"
                   class="vtt-w-4 vtt-h-4 vtt-rounded vtt-border-neutral-300 vtt-text-neutral-900 focus:vtt-ring-neutral-500"
                   :class="(isRowSelectable && !isRowSelectable(row)) ? 'vtt-cursor-not-allowed vtt-opacity-50' : 'vtt-cursor-pointer'" />
               </td>
@@ -544,8 +544,7 @@ const hasActionsCol = computed(() =>
   visibleColumns.value.some(c => c.type === 'actions')
 )
 
-function detailColumns(row: DataRow): ColumnDefinition[] {
-  console.log(row)
+function detailColumns(): ColumnDefinition[] {
   const shown = new Set([
     primaryCol.value?.field,
     badgeCol.value?.field,
@@ -674,6 +673,14 @@ function onFilterUpdate(partial: Partial<DataTableFilter>) {
 }
 function onFilterReset() {
   store.resetFilters(store.activeKey)
+}
+
+function handleToggleSelect(row: DataRow) {
+  store.toggleSelect(store.activeKey, row.id, props.isRowSelectable)
+}
+
+function handleToggleSelectAll() {
+  store.toggleSelectAll(store.activeKey, props.isRowSelectable)
 }
 
 watch(() => props.sections, defs => store.initSections(defs), { immediate: true, deep: true })
