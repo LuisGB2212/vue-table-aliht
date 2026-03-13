@@ -67,13 +67,13 @@ const sections = ref<SectionDefinition[]>([
 ])
 
 const columns = ref<ColumnDefinition[]>([
-  { field: 'date',              label: 'Date',              type: 'date',     sortable: true, width: '120px' },
+  { field: 'date',              label: 'Date',              type: 'date',     sortable: true },
   { field: 'transactionNumber', label: 'Transaction #',     type: 'text',     sortable: true },
-  { field: 'description',       label: 'Description',       type: 'text',     sortable: true, truncate: true, tooltip: true, width: '220px' },
-  { field: 'amount',            label: 'Amount',            type: 'currency', sortable: true, align: 'right', width: '110px' },
+  { field: 'description',       label: 'Description',       type: 'text',     sortable: true, truncate: true, tooltip: true },
+  { field: 'amount',            label: 'Amount',            type: 'currency', sortable: true, align: 'right' },
   { field: 'category',          label: 'Category',          type: 'text',     sortable: true },
   { field: 'status',            label: 'Status',            type: 'status',   sortable: true },
-  { field: 'voucher',           label: 'Voucher',           type: 'custom',   sortable: false, align: 'center', width: '90px' },
+  { field: 'voucher',           label: 'Voucher',           type: 'custom',   sortable: false, visible: false, align: 'center', width: '90px' },
   { type: 'actions',            label: '',                  width: '96px',    align: 'right' },
 ])
 

@@ -1,7 +1,7 @@
 <template>
   <div class="vtt-relative" ref="containerRef">
     <button
-      @click="open = !open"
+      @click="toggleOpen()"
       :class="[
         'vtt-flex vtt-items-center vtt-gap-2 vtt-px-3 vtt-py-2 vtt-rounded-lg vtt-border vtt-text-sm vtt-font-medium vtt-transition-all',
         open
@@ -9,7 +9,6 @@
           : 'vtt-border-neutral-200 vtt-bg-white vtt-text-neutral-600 hover:vtt-border-neutral-300 hover:vtt-text-neutral-900'
       ]"
     >
-      <!-- columns icon -->
       <svg class="vtt-w-4 vtt-h-4" fill="none" viewBox="0 0 16 16">
         <rect x="2" y="3" width="12" height="1.5" rx="0.75" fill="currentColor"/>
         <rect x="2" y="7.25" width="9" height="1.5" rx="0.75" fill="currentColor"/>
@@ -21,10 +20,12 @@
       </svg>
     </button>
 
+    <Teleport to="body">
     <Transition name="dropdown">
       <div
         v-if="open"
-        class="vtt-absolute vtt-right-0 vtt-top-full vtt-mt-1.5 vtt-w-[220px] vtt-bg-white vtt-border vtt-border-neutral-200 vtt-rounded-2xl vtt-shadow-dropdown vtt-z-50"
+        :style="panelStyle"
+        class="vtt-scope vtt-fixed vtt-w-[220px] vtt-bg-white vtt-border vtt-border-neutral-200 vtt-rounded-2xl vtt-shadow-dropdown vtt-z-[9999]"
       >
         <div class="vtt-px-4 vtt-pt-4 vtt-pb-1">
           <p class="vtt-text-[10px] vtt-font-bold vtt-text-neutral-400 vtt-uppercase vtt-tracking-widest vtt-mb-3">Toggle Columns</p>
@@ -34,7 +35,6 @@
               :key="colKey(col)"
               class="vtt-flex vtt-items-center vtt-gap-2.5 vtt-cursor-pointer vtt-py-1.5 vtt-px-1.5 vtt-rounded-lg hover:vtt-bg-neutral-50 vtt-transition-colors vtt-group vtt-select-none"
             >
-              <!-- Toggle switch style -->
               <div
                 :class="[
                   'vtt-w-4 vtt-h-4 vtt-rounded vtt-border vtt-flex vtt-items-center vtt-justify-center vtt-flex-shrink-0 vtt-transition-all',
@@ -56,35 +56,43 @@
         </div>
 
         <div class="vtt-flex vtt-items-center vtt-justify-between vtt-px-4 vtt-py-3 vtt-border-t vtt-border-neutral-100 vtt-mt-2 vtt-rounded-b-2xl">
-          <button
-            @click="showAll"
-            class="vtt-text-xs vtt-text-neutral-500 hover:vtt-text-neutral-800 vtt-transition-colors vtt-font-medium"
-          >Show all</button>
-          <button
-            @click="open = false"
-            class="vtt-text-xs vtt-font-semibold vtt-bg-neutral-900 vtt-text-white vtt-px-4 vtt-py-1.5 vtt-rounded-lg hover:vtt-bg-neutral-700 vtt-transition-colors"
-          >Done</button>
+          <button @click="showAll" class="vtt-text-xs vtt-text-neutral-500 hover:vtt-text-neutral-800 vtt-transition-colors vtt-font-medium">Show all</button>
+          <button @click="open = false" class="vtt-text-xs vtt-font-semibold vtt-bg-neutral-900 vtt-text-white vtt-px-4 vtt-py-1.5 vtt-rounded-lg hover:vtt-bg-neutral-700 vtt-transition-colors">Done</button>
         </div>
       </div>
     </Transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import type { ColumnDefinition, DataColumn } from '../types'
 
 const props = defineProps<{ columns: ColumnDefinition[] }>()
+const emit = defineEmits<{ (e: 'update:columns', cols: ColumnDefinition[]): void }>()
 
-const emit = defineEmits<{
-  (e: 'update:columns', cols: ColumnDefinition[]): void
-}>()
-
-const open = ref(false)
+const open         = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
+const panelStyle   = ref<Record<string, string>>({})
 
-// Only show toggling for non-actions columns
-const toggleableColumns = props.columns.filter(c => c.type !== 'actions')
+function updatePosition() {
+  const el = containerRef.value
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  // align to right edge of the button
+  panelStyle.value = {
+    top:   `${rect.bottom + 6}px`,
+    left:  `${rect.right - 220}px`,   // 220 = panel width
+  }
+}
+
+function toggleOpen() {
+  if (!open.value) updatePosition()
+  open.value = !open.value
+}
+
+const toggleableColumns = computed(() => props.columns.filter(c => c.type !== 'actions'))
 
 function colKey(col: ColumnDefinition): string {
   return (col as DataColumn).field ?? '__actions__'
@@ -105,16 +113,18 @@ function toggle(col: ColumnDefinition) {
 }
 
 function showAll() {
-  const next = props.columns.map(c => ({ ...c, visible: true }))
-  emit('update:columns', next)
+  emit('update:columns', props.columns.map(c => ({ ...c, visible: true })))
 }
 
 function handleOutside(e: MouseEvent) {
-  if (containerRef.value && !containerRef.value.contains(e.target as Node)) open.value = false
+  if (!open.value) return
+  if (containerRef.value && !containerRef.value.contains(e.target as Node)) {
+    open.value = false
+  }
 }
 
-onMounted(() => document.addEventListener('mousedown', handleOutside))
-onUnmounted(() => document.removeEventListener('mousedown', handleOutside))
+onMounted(() => document.addEventListener('click', handleOutside, true))
+onUnmounted(() => document.removeEventListener('click', handleOutside, true))
 </script>
 
 <style scoped>

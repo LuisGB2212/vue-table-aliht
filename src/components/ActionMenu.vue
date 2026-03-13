@@ -56,11 +56,14 @@ function onAction(action: string) {
 }
 
 function handleOutside(e: MouseEvent) {
-  if (containerRef.value && !containerRef.value.contains(e.target as Node)) open.value = false
+  if (!open.value) return
+  if (containerRef.value && !containerRef.value.contains(e.target as Node)) {
+    open.value = false
+  }
 }
 
-onMounted(() => document.addEventListener('mousedown', handleOutside))
-onUnmounted(() => document.removeEventListener('mousedown', handleOutside))
+onMounted(() => document.addEventListener('click', handleOutside, true))
+onUnmounted(() => document.removeEventListener('click', handleOutside, true))
 </script>
 
 <style scoped>

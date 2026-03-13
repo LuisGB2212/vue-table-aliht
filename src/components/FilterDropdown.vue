@@ -1,7 +1,7 @@
 <template>
   <div class="vtt-relative" ref="containerRef">
     <button
-      @click="open = !open"
+      @click="toggleOpen()"
       :class="[
         'vtt-flex vtt-items-center vtt-gap-2 vtt-px-3 vtt-py-2 vtt-rounded-lg vtt-border vtt-text-sm vtt-font-medium vtt-transition-all',
         open || activeCount > 0
@@ -16,10 +16,12 @@
       <span v-if="activeCount > 0" class="vtt-bg-neutral-900 vtt-text-white vtt-text-xs vtt-rounded-full vtt-w-4 vtt-h-4 vtt-flex vtt-items-center vtt-justify-center vtt-leading-none vtt-font-semibold">{{ activeCount }}</span>
     </button>
 
+    <Teleport to="body">
     <Transition name="dropdown">
       <div
         v-if="open"
-        class="vtt-absolute vtt-left-0 vtt-top-full vtt-mt-1.5 vtt-w-[280px] vtt-bg-white vtt-border vtt-border-neutral-200 vtt-rounded-2xl vtt-shadow-dropdown vtt-z-50"
+        :style="panelStyle"
+        class="vtt-scope vtt-fixed vtt-w-[280px] vtt-bg-white vtt-border vtt-border-neutral-200 vtt-rounded-2xl vtt-shadow-dropdown vtt-z-[9999]"
       >
         <!-- Search -->
         <div class="vtt-px-4 vtt-pt-4 vtt-pb-3">
@@ -112,6 +114,7 @@
         </div>
       </div>
     </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -126,8 +129,24 @@ const emit = defineEmits<{
   (e: 'reset'): void
 }>()
 
-const open = ref(false)
+const open        = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
+const panelStyle  = ref<Record<string, string>>({})
+
+function updatePosition() {
+  const el = containerRef.value
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  panelStyle.value = {
+    top:  `${rect.bottom + 6}px`,
+    left: `${rect.left}px`,
+  }
+}
+
+function toggleOpen() {
+  if (!open.value) updatePosition()
+  open.value = !open.value
+}
 
 const statusOptions: { value: TransactionStatus; label: string }[] = [
   { value: 'new',              label: 'New' },
@@ -160,11 +179,15 @@ function onClear() {
 }
 
 function handleOutside(e: MouseEvent) {
-  if (containerRef.value && !containerRef.value.contains(e.target as Node)) open.value = false
+  if (!open.value) return
+  const target = e.target as Node
+  if (containerRef.value && !containerRef.value.contains(target)) {
+    open.value = false
+  }
 }
 
-onMounted(() => document.addEventListener('mousedown', handleOutside))
-onUnmounted(() => document.removeEventListener('mousedown', handleOutside))
+onMounted(() => document.addEventListener('click', handleOutside, true))
+onUnmounted(() => document.removeEventListener('click', handleOutside, true))
 </script>
 
 <style scoped>
