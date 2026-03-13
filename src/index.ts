@@ -1,16 +1,18 @@
 import type { App } from 'vue'
 import { createPinia } from 'pinia'
-import TransactionsTable from './components/TransactionsTable.vue'
+import DataTable from './components/DataTable.vue'
 import StatusBadge from './components/StatusBadge.vue'
 import TablePagination from './components/TablePagination.vue'
 import FilterDropdown from './components/FilterDropdown.vue'
-import { useTransactionsStore } from './stores/transactionsStore'
+import ColumnsDropdown from './components/ColumnsDropdown.vue'
+import ActionMenu from './components/ActionMenu.vue'
+import { useDataTableStore } from './stores/dataTableStore'
 
 export type {
-  Transaction,
-  TransactionStatus,
-  TransactionCategory,
-  TransactionFilter,
+  DataRow,
+  DataTableFilter,
+  DataTableProps,
+  DisplayMode,
   SortState,
   PaginationState,
   SectionDefinition,
@@ -19,16 +21,29 @@ export type {
   SectionState,
   ApiPaginatedResponse,
   ApiQueryParams,
+  ColumnDefinition,
+  DataColumn,
+  ActionsColumn,
+  ColumnType,
+  ColumnAlign,
+  // Legacy
+  Transaction,
+  TransactionStatus,
+  TransactionCategory,
   TransactionsTableProps,
-  TransactionTab,
 } from './types'
 
 export {
-  TransactionsTable,
+  DataTable,
   StatusBadge,
   TablePagination,
   FilterDropdown,
-  useTransactionsStore,
+  ColumnsDropdown,
+  ActionMenu,
+  useDataTableStore,
+  // Legacy alias
+  DataTable as TransactionsTable,
+  useDataTableStore as useTransactionsStore,
 }
 
 export default {
@@ -37,9 +52,12 @@ export default {
       const pinia = options?.pinia ?? createPinia()
       app.use(pinia)
     }
-    app.component('TransactionsTable', TransactionsTable)
+    app.component('DataTable', DataTable)
+    app.component('TransactionsTable', DataTable) // legacy alias
     app.component('StatusBadge', StatusBadge)
     app.component('TablePagination', TablePagination)
     app.component('FilterDropdown', FilterDropdown)
+    app.component('ColumnsDropdown', ColumnsDropdown)
+    app.component('ActionMenu', ActionMenu)
   },
 }

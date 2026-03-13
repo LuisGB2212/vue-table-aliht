@@ -4,7 +4,7 @@
       @click="open = !open"
       :class="[
         'vtt-flex vtt-items-center vtt-gap-2 vtt-px-3 vtt-py-2 vtt-rounded-lg vtt-border vtt-text-sm vtt-font-medium vtt-transition-all',
-        open
+        open || activeCount > 0
           ? 'vtt-border-neutral-400 vtt-bg-neutral-50 vtt-text-neutral-900'
           : 'vtt-border-neutral-200 vtt-bg-white vtt-text-neutral-600 hover:vtt-border-neutral-300 hover:vtt-text-neutral-900'
       ]"
@@ -13,77 +13,100 @@
         <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
       Filter
-      <span v-if="activeCount > 0" class="vtt-bg-neutral-900 vtt-text-white vtt-text-xs vtt-rounded-full vtt-px-1.5 vtt-py-0.5 vtt-leading-none">{{ activeCount }}</span>
+      <span v-if="activeCount > 0" class="vtt-bg-neutral-900 vtt-text-white vtt-text-xs vtt-rounded-full vtt-w-4 vtt-h-4 vtt-flex vtt-items-center vtt-justify-center vtt-leading-none vtt-font-semibold">{{ activeCount }}</span>
     </button>
 
     <Transition name="dropdown">
       <div
         v-if="open"
-        class="vtt-absolute vtt-left-0 vtt-top-full vtt-mt-2 vtt-w-72 vtt-bg-white vtt-border vtt-border-neutral-200 vtt-rounded-xl vtt-shadow-dropdown vtt-z-50 vtt-overflow-hidden"
+        class="vtt-absolute vtt-left-0 vtt-top-full vtt-mt-1.5 vtt-w-[280px] vtt-bg-white vtt-border vtt-border-neutral-200 vtt-rounded-2xl vtt-shadow-dropdown vtt-z-50"
       >
         <!-- Search -->
-        <div class="vtt-p-4 vtt-border-b vtt-border-neutral-100">
-          <p class="vtt-text-xs vtt-font-semibold vtt-text-neutral-500 vtt-uppercase vtt-tracking-wider vtt-mb-3">Search</p>
-          <input
-            :value="filters.search"
-            @input="emit('update:filter', { search: ($event.target as HTMLInputElement).value })"
-            type="text"
-            placeholder="Search transactions..."
-            class="vtt-w-full vtt-text-sm vtt-px-3 vtt-py-2 vtt-border vtt-border-neutral-200 vtt-rounded-lg focus:vtt-outline-none focus:vtt-ring-2 focus:vtt-ring-neutral-300"
-          />
+        <div class="vtt-px-4 vtt-pt-4 vtt-pb-3">
+          <p class="vtt-text-[10px] vtt-font-bold vtt-text-neutral-400 vtt-uppercase vtt-tracking-widest vtt-mb-2.5">Search</p>
+          <div class="vtt-relative">
+            <svg class="vtt-absolute vtt-left-3 vtt-top-1/2 -vtt-translate-y-1/2 vtt-w-3.5 vtt-h-3.5 vtt-text-neutral-400 vtt-pointer-events-none" fill="none" viewBox="0 0 14 14">
+              <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M9.5 9.5l2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            <input
+              :value="filters.search"
+              @input="emit('update:filter', { search: ($event.target as HTMLInputElement).value })"
+              type="text"
+              placeholder="Search records..."
+              class="vtt-w-full vtt-text-sm vtt-pl-8 vtt-pr-3 vtt-py-2 vtt-border vtt-border-neutral-200 vtt-rounded-xl vtt-bg-neutral-50 focus:vtt-outline-none focus:vtt-border-neutral-400 focus:vtt-bg-white vtt-transition-all vtt-text-neutral-800 placeholder:vtt-text-neutral-400"
+            />
+          </div>
         </div>
 
+        <div class="vtt-h-px vtt-bg-neutral-100 vtt-mx-4"/>
+
         <!-- Status -->
-        <div class="vtt-p-4 vtt-border-b vtt-border-neutral-100">
-          <p class="vtt-text-xs vtt-font-semibold vtt-text-neutral-500 vtt-uppercase vtt-tracking-wider vtt-mb-3">Status</p>
-          <div class="vtt-space-y-2">
+        <div class="vtt-px-4 vtt-py-3">
+          <p class="vtt-text-[10px] vtt-font-bold vtt-text-neutral-400 vtt-uppercase vtt-tracking-widest vtt-mb-2.5">Status</p>
+          <div class="vtt-space-y-1">
             <label
               v-for="status in statusOptions"
               :key="status.value"
-              class="vtt-flex vtt-items-center vtt-gap-2 vtt-cursor-pointer vtt-group"
+              class="vtt-flex vtt-items-center vtt-gap-2.5 vtt-cursor-pointer vtt-py-1 vtt-px-1.5 vtt-rounded-lg hover:vtt-bg-neutral-50 vtt-transition-colors vtt-group"
             >
-              <input
-                type="checkbox"
-                :value="status.value"
-                :checked="filters.status?.includes(status.value)"
-                @change="toggleStatus(status.value)"
-                class="vtt-w-4 vtt-h-4 vtt-rounded vtt-border-neutral-300 vtt-text-neutral-900 focus:vtt-ring-neutral-500"
-              />
-              <span class="vtt-text-sm vtt-text-neutral-700 group-hover:vtt-text-neutral-900">{{ status.label }}</span>
+              <div
+                :class="[
+                  'vtt-w-4 vtt-h-4 vtt-rounded vtt-border vtt-flex vtt-items-center vtt-justify-center vtt-flex-shrink-0 vtt-transition-all',
+                  filters.status?.includes(status.value)
+                    ? 'vtt-bg-neutral-900 vtt-border-neutral-900'
+                    : 'vtt-border-neutral-300 vtt-bg-white group-hover:vtt-border-neutral-400'
+                ]"
+                @click="toggleStatus(status.value)"
+              >
+                <svg v-if="filters.status?.includes(status.value)" class="vtt-w-2.5 vtt-h-2.5 vtt-text-white" fill="none" viewBox="0 0 10 10">
+                  <path d="M2 5l2.5 2.5L8 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <span class="vtt-text-sm vtt-text-neutral-700 group-hover:vtt-text-neutral-900 vtt-transition-colors vtt-select-none">{{ status.label }}</span>
             </label>
           </div>
         </div>
 
-        <!-- Date range -->
-        <div class="vtt-p-4 vtt-border-b vtt-border-neutral-100">
-          <p class="vtt-text-xs vtt-font-semibold vtt-text-neutral-500 vtt-uppercase vtt-tracking-wider vtt-mb-3">Date Range</p>
+        <div class="vtt-h-px vtt-bg-neutral-100 vtt-mx-4"/>
+
+        <!-- Date Range -->
+        <div class="vtt-px-4 vtt-py-3">
+          <p class="vtt-text-[10px] vtt-font-bold vtt-text-neutral-400 vtt-uppercase vtt-tracking-widest vtt-mb-2.5">Date Range</p>
           <div class="vtt-grid vtt-grid-cols-2 vtt-gap-2">
             <div>
-              <label class="vtt-text-xs vtt-text-neutral-500 vtt-mb-1 vtt-block">From</label>
+              <label class="vtt-text-[11px] vtt-text-neutral-500 vtt-mb-1 vtt-block vtt-font-medium">From</label>
               <input
                 :value="filters.dateFrom"
                 @input="emit('update:filter', { dateFrom: ($event.target as HTMLInputElement).value })"
                 type="date"
-                class="vtt-w-full vtt-text-sm vtt-px-2 vtt-py-1.5 vtt-border vtt-border-neutral-200 vtt-rounded-lg focus:vtt-outline-none focus:vtt-ring-2 focus:vtt-ring-neutral-300"
+                class="vtt-w-full vtt-text-xs vtt-px-2.5 vtt-py-2 vtt-border vtt-border-neutral-200 vtt-rounded-xl vtt-bg-neutral-50 focus:vtt-outline-none focus:vtt-border-neutral-400 focus:vtt-bg-white vtt-transition-all vtt-text-neutral-700"
               />
             </div>
             <div>
-              <label class="vtt-text-xs vtt-text-neutral-500 vtt-mb-1 vtt-block">To</label>
+              <label class="vtt-text-[11px] vtt-text-neutral-500 vtt-mb-1 vtt-block vtt-font-medium">To</label>
               <input
                 :value="filters.dateTo"
                 @input="emit('update:filter', { dateTo: ($event.target as HTMLInputElement).value })"
                 type="date"
-                class="vtt-w-full vtt-text-sm vtt-px-2 vtt-py-1.5 vtt-border vtt-border-neutral-200 vtt-rounded-lg focus:vtt-outline-none focus:vtt-ring-2 focus:vtt-ring-neutral-300"
+                class="vtt-w-full vtt-text-xs vtt-px-2.5 vtt-py-2 vtt-border vtt-border-neutral-200 vtt-rounded-xl vtt-bg-neutral-50 focus:vtt-outline-none focus:vtt-border-neutral-400 focus:vtt-bg-white vtt-transition-all vtt-text-neutral-700"
               />
             </div>
           </div>
         </div>
 
-        <div class="vtt-flex vtt-items-center vtt-justify-between vtt-p-3">
-          <button @click="emit('reset')" class="vtt-text-sm vtt-text-neutral-500 hover:vtt-text-neutral-700 vtt-transition-colors">
+        <!-- Footer -->
+        <div class="vtt-flex vtt-items-center vtt-justify-between vtt-px-4 vtt-py-3 vtt-border-t vtt-border-neutral-100 vtt-rounded-b-2xl">
+          <button
+            @click="onClear"
+            class="vtt-text-sm vtt-text-neutral-500 hover:vtt-text-neutral-800 vtt-transition-colors vtt-font-medium"
+          >
             Clear all
           </button>
-          <button @click="open = false" class="vtt-text-sm vtt-font-medium vtt-bg-neutral-900 vtt-text-white vtt-px-4 vtt-py-1.5 vtt-rounded-lg hover:vtt-bg-neutral-700 vtt-transition-colors">
+          <button
+            @click="open = false"
+            class="vtt-text-sm vtt-font-semibold vtt-bg-neutral-900 vtt-text-white vtt-px-5 vtt-py-2 vtt-rounded-xl hover:vtt-bg-neutral-700 vtt-transition-colors"
+          >
             Apply
           </button>
         </div>
@@ -94,12 +117,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import type { TransactionFilter, TransactionStatus } from '../types'
+import type { DataTableFilter, TransactionStatus } from '../types'
 
-const props = defineProps<{ filters: TransactionFilter }>()
+const props = defineProps<{ filters: DataTableFilter }>()
 
 const emit = defineEmits<{
-  (e: 'update:filter', partial: Partial<TransactionFilter>): void
+  (e: 'update:filter', partial: Partial<DataTableFilter>): void
   (e: 'reset'): void
 }>()
 
@@ -132,6 +155,10 @@ function toggleStatus(status: TransactionStatus) {
   emit('update:filter', { status: next })
 }
 
+function onClear() {
+  emit('reset')
+}
+
 function handleOutside(e: MouseEvent) {
   if (containerRef.value && !containerRef.value.contains(e.target as Node)) open.value = false
 }
@@ -141,6 +168,6 @@ onUnmounted(() => document.removeEventListener('mousedown', handleOutside))
 </script>
 
 <style scoped>
-.dropdown-enter-active, .dropdown-leave-active { transition: all 0.15s ease; }
-.dropdown-enter-from, .dropdown-leave-to { opacity: 0; transform: translateY(-6px) scale(0.98); }
+.dropdown-enter-active, .dropdown-leave-active { transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1); }
+.dropdown-enter-from, .dropdown-leave-to { opacity: 0; transform: translateY(-8px) scale(0.97); }
 </style>

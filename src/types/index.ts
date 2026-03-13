@@ -1,14 +1,9 @@
 // ─────────────────────────────────────────────
-// Transaction core types
+// Row / record types
 // ─────────────────────────────────────────────
 export type TransactionStatus =
-  | 'new'
-  | 'pending-approval'
-  | 'pending-review'
-  | 'approved'
-  | 'finalized'
-  | 'in-progress'
-  | 'rejected'
+  | 'new' | 'pending-approval' | 'pending-review'
+  | 'approved' | 'finalized' | 'in-progress' | 'rejected'
 
 export type TransactionCategory = string
 
@@ -23,80 +18,59 @@ export interface Transaction {
   [key: string]: unknown
 }
 
+// Generic row — the table works with any record that has an id
+export type DataRow = Record<string, unknown> & { id: string | number }
+
 // ─────────────────────────────────────────────
 // Column definition
 // ─────────────────────────────────────────────
-
 export type ColumnAlign = 'left' | 'center' | 'right'
 export type ColumnType = 'text' | 'number' | 'currency' | 'date' | 'status' | 'custom' | 'actions'
 
-/**
- * A regular data column — bound to a field in the row.
- */
 export interface DataColumn {
-  /** Field name in the Transaction object. */
   field: string
-  /** Header label shown in the table. */
   label: string
-  /**
-   * Column type. Controls default rendering:
-   * - 'text'     → plain string
-   * - 'number'   → formatted number
-   * - 'currency' → formatted with currency symbol
-   * - 'date'     → formatted date
-   * - 'status'   → renders <StatusBadge>
-   * - 'custom'   → you provide a slot named after `field`
-   */
   type?: ColumnType
-  /** Whether the column header is clickable to sort. Default: true */
   sortable?: boolean
-  /** Text alignment. Default: 'left' */
   align?: ColumnAlign
-  /** Fixed pixel or CSS width, e.g. '120px' or '10%' */
   width?: string
-  /** Min width, e.g. '80px' */
   minWidth?: string
-  /** Truncate content with ellipsis when overflowing */
   truncate?: boolean
-  /** Show a tooltip with the full cell value on hover */
   tooltip?: boolean
-  /** CSS class(es) applied to every cell in this column */
   cellClass?: string
-  /** CSS class(es) applied to the header cell */
   headerClass?: string
-  /** Whether the column is visible. Default: true */
+  /** Default true. If false column is hidden but still listed in Columns panel */
   visible?: boolean
-  /** Format function — called with the raw value, returns display string */
-  format?: (value: unknown, row: Transaction) => string
+  format?: (value: unknown, row: DataRow) => string
 }
 
-/**
- * An action column — no field, renders a slot or default action menu.
- * Must set type: 'actions'
- */
 export interface ActionsColumn {
   type: 'actions'
-  /** Label shown in the header. Default: '' */
   label?: string
-  /** Align the actions. Default: 'right' */
   align?: ColumnAlign
-  /** Fixed width. Default: '60px' */
   width?: string
-  /** CSS class(es) applied to every cell */
   cellClass?: string
-  /** CSS class(es) applied to the header cell */
   headerClass?: string
-  /** Whether the column is visible. Default: true */
   visible?: boolean
 }
 
 export type ColumnDefinition = DataColumn | ActionsColumn
 
 // ─────────────────────────────────────────────
-// API contract
+// Display mode
 // ─────────────────────────────────────────────
 
-export interface ApiPaginatedResponse<T = Transaction> {
+/**
+ * 'paginated' — classic page buttons (default)
+ * 'infinite'  — infinite scroll: when user reaches the end, next page
+ *               is appended to the existing rows automatically.
+ */
+export type DisplayMode = 'paginated' | 'infinite'
+
+// ─────────────────────────────────────────────
+// API contract
+// ─────────────────────────────────────────────
+export interface ApiPaginatedResponse<T = DataRow> {
   data: T[]
   pagination: {
     page: number
@@ -121,10 +95,9 @@ export interface ApiQueryParams {
 // ─────────────────────────────────────────────
 // Section source
 // ─────────────────────────────────────────────
-
 export interface SectionLocal {
   mode: 'local'
-  data: Transaction[]
+  data: DataRow[]
 }
 
 export interface SectionApi {
@@ -144,8 +117,7 @@ export interface SectionDefinition {
 // ─────────────────────────────────────────────
 // Runtime state
 // ─────────────────────────────────────────────
-
-export interface TransactionFilter {
+export interface DataTableFilter {
   search?: string
   status?: TransactionStatus[]
   category?: string[]
@@ -167,36 +139,31 @@ export interface PaginationState {
 
 export interface SectionState {
   definition: SectionDefinition
-  rows: Transaction[]
+  rows: DataRow[]
+  /** In infinite mode, all accumulated rows so far */
+  accumulatedRows: DataRow[]
   loading: boolean
+  loadingMore: boolean
+  hasMore: boolean
   error: string | null
   pagination: PaginationState
   sort: SortState
-  filters: TransactionFilter
+  filters: DataTableFilter
   selectedIds: Set<string | number>
-  filteredRows: Transaction[]
+  filteredRows: DataRow[]
 }
 
 // ─────────────────────────────────────────────
 // Component props
 // ─────────────────────────────────────────────
-
-export interface TransactionsTableProps {
+export interface DataTableProps {
   sections: SectionDefinition[]
-  /**
-   * Column definitions. The order here is the order rendered.
-   *
-   * @example
-   * :columns="[
-   *   { field: 'date',        label: 'Date',   type: 'date',     sortable: true },
-   *   { field: 'description', label: 'Desc',   type: 'text',     truncate: true, width: '200px' },
-   *   { field: 'amount',      label: 'Amount', type: 'currency', align: 'right' },
-   *   { field: 'status',      label: 'Status', type: 'status',   sortable: false },
-   *   { field: 'voucher',     label: 'Voucher',type: 'custom' },  // uses slot name="col-voucher"
-   *   { type: 'actions',      label: '',       width: '60px' },   // uses slot name="col-actions"
-   * ]"
-   */
   columns: ColumnDefinition[]
+  /**
+   * 'paginated' (default) — classic pagination controls
+   * 'infinite'            — infinite scroll, appends rows on scroll end
+   */
+  displayMode?: DisplayMode
   title?: string
   showImport?: boolean
   showExport?: boolean
@@ -206,7 +173,8 @@ export interface TransactionsTableProps {
   locale?: string
 }
 
-// Legacy compat
+// Legacy compat alias
+export type TransactionsTableProps = DataTableProps
 export interface TransactionTab {
   key: string
   label: string
