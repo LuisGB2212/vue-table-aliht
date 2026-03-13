@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* Solo components y utilities — sin preflight (base reset) */
+@tailwind components;
+@tailwind utilities;
+
+/* Scope raíz: todos los estilos quedan encapsulados aquí */
+.vtt-scope {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  box-sizing: border-box;
+}
+
+.vtt-scope *,
+.vtt-scope *::before,
+.vtt-scope *::after {
+  box-sizing: inherit;
+}
+
+/* Checkbox indeterminate */
+.vtt-scope input[type="checkbox"]:indeterminate {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 8h8'/%3e%3c/svg%3e");
+  background-color: #171717;
+  border-color: #171717;
+}
