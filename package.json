@@ -1,31 +1,34 @@
 {
-  "name": "@devkit/vue-transactions-table",
+  "name": "vue-data-table-corporative",
   "version": "1.0.0",
-  "description": "A reusable Vue 3 transactions table component with Pinia store, filtering, pagination, and status management",
+  "description": "A reusable Vue 3 data table component with Pinia store, filtering, pagination, and status management",
   "type": "module",
-  "main": "./dist/vue-transactions-table.umd.cjs",
-  "module": "./dist/vue-transactions-table.js",
-  "exports": {
-    ".": {
-      "import": "./dist/vue-transactions-table.js",
-      "require": "./dist/vue-transactions-table.umd.cjs"
-    },
-    "./style.css": "./dist/style.css"
-  },
   "files": [
     "dist"
   ],
+  "main": "./dist/vue-data-table-corporative.umd.cjs",
+  "module": "./dist/vue-data-table-corporative.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/vue-data-table-corporative.js",
+      "require": "./dist/vue-data-table-corporative.umd.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
   "scripts": {
     "dev": "concurrently \"tailwindcss -i src/style.dev.css -o src/tailwind.generated.css --watch\" \"vite\"",
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
-    "build:lib": "vite build --mode lib && tailwindcss -i src/style.css -o dist/style.css --minify"
+    "build:lib": "vite build --mode lib"
   },
   "peerDependencies": {
     "pinia": "^2.1.0",
     "vue": "^3.3.0"
   },
   "devDependencies": {
+    "@types/node": "^25.5.0",
     "@types/sortablejs": "^1.15.9",
     "@vitejs/plugin-vue": "^5.0.0",
     "autoprefixer": "^10.4.19",
@@ -35,6 +38,7 @@
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.0",
     "vite": "^5.2.0",
+    "vite-plugin-dts": "^4.5.4",
     "vue": "^3.4.21",
     "vue-tsc": "^2.0.13"
   },

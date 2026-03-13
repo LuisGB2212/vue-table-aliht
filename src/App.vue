@@ -1,5 +1,5 @@
 <template>
-  <div class="vtt-scope vtt-min-h-screen vtt-bg-neutral-100 vtt-p-2 sm:vtt-p-8">
+  <div class="scope min-h-screen bg-neutral-100 p-2 sm:p-8">
     <DataTable
       :sections="sections"
       :columns="columns"
@@ -7,32 +7,38 @@
       currency="USD"
       locale="en-US"
       storageId="demo-table"
+      :showExport="true"
+      :showImport="true"
+      :showCreateButton="true"
+      createButtonLabel="Agregar Agencia"
       :selectable="true"
       :is-row-selectable="row => (row.status as string) !== 'rejected'"
+      @create="onCreate"
       @row-click="onRowClick"
       @action="onAction"
       @section-change="onSectionChange"
       @selection-change="onSelectionChange"
+      size="md"
     >
       <template #col-voucher="{ value }">
         <a v-if="value" :href="String(value)" target="_blank" @click.stop
-          class="vtt-inline-flex vtt-items-center vtt-gap-1 vtt-text-xs vtt-font-medium vtt-text-blue-600 hover:vtt-text-blue-800 vtt-underline">
-          <svg class="vtt-w-3 vtt-h-3" fill="none" viewBox="0 0 12 12"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          class="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 underline">
+          <svg class="w-3 h-3" fill="none" viewBox="0 0 12 12"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           View
         </a>
-        <span v-else class="vtt-text-neutral-300 vtt-text-xs">—</span>
+        <span v-else class="text-neutral-300 text-xs">—</span>
       </template>
 
       <!-- <template #col-actions="{ row }">
-        <div class="vtt-flex vtt-items-center vtt-gap-1" @click.stop>
-          <button @click="onAction('approve', row)" class="vtt-p-1.5 vtt-rounded-md vtt-text-emerald-600 hover:vtt-bg-emerald-50 vtt-transition-colors" title="Approve">
-            <svg class="vtt-w-3.5 vtt-h-3.5" fill="none" viewBox="0 0 14 14"><path d="M2.5 7l3 3 6-5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="flex items-center gap-1" @click.stop>
+          <button @click="onAction('approve', row)" class="p-1.5 rounded-md text-emerald-600 hover:bg-emerald-50 transition-colors" title="Approve">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 14 14"><path d="M2.5 7l3 3 6-5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <button @click="onAction('edit', row)" class="vtt-p-1.5 vtt-rounded-md vtt-text-neutral-500 hover:vtt-bg-neutral-100 vtt-transition-colors" title="Edit">
-            <svg class="vtt-w-3.5 vtt-h-3.5" fill="none" viewBox="0 0 14 14"><path d="M9.5 2.5l2 2-7 7H2.5v-2l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <button @click="onAction('edit', row)" class="p-1.5 rounded-md text-neutral-500 hover:bg-neutral-100 transition-colors" title="Edit">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 14 14"><path d="M9.5 2.5l2 2-7 7H2.5v-2l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <button @click="onAction('delete', row)" class="vtt-p-1.5 vtt-rounded-md vtt-text-red-400 hover:vtt-bg-red-50 vtt-transition-colors" title="Delete">
-            <svg class="vtt-w-3.5 vtt-h-3.5" fill="none" viewBox="0 0 14 14"><path d="M2 3.5h10M5.5 3.5V2.5h3v1M4 3.5l.7 8h4.6l.7-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <button @click="onAction('delete', row)" class="p-1.5 rounded-md text-red-400 hover:bg-red-50 transition-colors" title="Delete">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 14 14"><path d="M2 3.5h10M5.5 3.5V2.5h3v1M4 3.5l.7 8h4.6l.7-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </div>
       </template> -->
@@ -82,6 +88,7 @@ const columns = ref<ColumnDefinition[]>([
 
 function onRowClick(row: DataRow) { console.log('Row:', row) }
 function onAction(action: string, row: DataRow) { console.log('Action:', action, row.id) }
+function onCreate() { console.log('Create') }
 function onSectionChange(key: string) { console.log('Section:', key) }
 function onSelectionChange(selected: DataRow[]) { console.log('Selected:', selected.length) }
 </script>

@@ -1,4 +1,4 @@
-import type { App } from 'vue'
+import type { App, Plugin } from 'vue'
 import { createPinia } from 'pinia'
 import DataTable from './components/DataTable.vue'
 import StatusBadge from './components/StatusBadge.vue'
@@ -33,6 +33,21 @@ export type {
   TransactionsTableProps,
 } from './types'
 
+const DataTableLib: Plugin = {
+  install(app: App, options?: { pinia?: ReturnType<typeof createPinia> }) {
+    if (!app.config.globalProperties.$pinia) {
+      const pinia = options?.pinia ?? createPinia()
+      app.use(pinia)
+    }
+    app.component('DataTableCorporative', DataTable)
+    app.component('StatusBadge', StatusBadge)
+    app.component('TablePagination', TablePagination)
+    app.component('FilterDropdown', FilterDropdown)
+    app.component('ColumnsDropdown', ColumnsDropdown)
+    app.component('ActionMenu', ActionMenu)
+  },
+}
+
 export {
   DataTable,
   StatusBadge,
@@ -41,23 +56,6 @@ export {
   ColumnsDropdown,
   ActionMenu,
   useDataTableStore,
-  // Legacy alias
-  // DataTable as TransactionsTable,
-  useDataTableStore as useTransactionsStore,
 }
 
-export default {
-  install(app: App, options?: { pinia?: ReturnType<typeof createPinia> }) {
-    if (!app.config.globalProperties.$pinia) {
-      const pinia = options?.pinia ?? createPinia()
-      app.use(pinia)
-    }
-    app.component('DataTableCorporative', DataTable)
-    // app.component('TransactionsTable', DataTable) // legacy alias
-    app.component('StatusBadge', StatusBadge)
-    app.component('TablePagination', TablePagination)
-    app.component('FilterDropdown', FilterDropdown)
-    app.component('ColumnsDropdown', ColumnsDropdown)
-    app.component('ActionMenu', ActionMenu)
-  },
-}
+export default DataTableLib

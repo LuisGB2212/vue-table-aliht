@@ -176,7 +176,8 @@ export interface DataTableProps {
   /** Whether to show the selection column. Default true. */
   selectable?: boolean
   /** Optional function to determine if a row is selectable. */
-  isRowSelectable?: (row: DataRow) => boolean
+  isRowSelectable?: (row: DataRow) => boolean,
+  size?: 'sm' | 'md' | 'lg'
 }
 
 // Legacy compat alias

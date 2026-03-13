@@ -1,6 +1,13 @@
 /** @type {import('tailwindcss').Config} */
+const plugin = require("tailwindcss/plugin");
+const colors = require("tailwindcss/colors");
+const { parseColor } = require("tailwindcss/lib/util/color");
+
+/** Converts HEX color to RGB */
+const toRGB = (value) => {
+  return parseColor(value).color.join(" ");
+};
 export default {
-  prefix: 'vtt-',
   content: [
     './index.html',
     './src/**/*.{vue,js,ts,jsx,tsx}',
@@ -13,6 +20,7 @@ export default {
         sans: ['Montserrat', 'system-ui', 'sans-serif'],
       },
       colors: {
+        primary: "rgb(var(--color-primary) / <alpha-value>)",
         brand: {
           50: '#fefce8', 100: '#fef9c3', 200: '#fef08a', 300: '#fde047',
           400: '#facc15', 500: '#eab308', 600: '#ca8a04', 700: '#a16207',
@@ -29,5 +37,24 @@ export default {
       }
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(function ({ addBase }) {
+      addBase({
+        // Default colors
+        ":root": {
+          "--color-theme-1": toRGB(colors.blue["800"]),
+          "--color-theme-2": toRGB(colors.blue["900"]),
+          "--color-primary": toRGB(colors.blue["900"]),
+          "--color-secondary": toRGB(colors.slate["200"]),
+          "--color-success": toRGB(colors.lime["600"]),
+          "--color-info": toRGB(colors.cyan["500"]),
+          "--color-warning": toRGB(colors.yellow["400"]),
+          "--color-pending": toRGB(colors.orange["500"]),
+          "--color-danger": toRGB(colors.red["600"]),
+          "--color-light": toRGB(colors.slate["100"]),
+          "--color-dark": toRGB(colors.slate["800"]),
+        },
+      })
+    })
+  ],
 }
