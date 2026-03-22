@@ -7,7 +7,11 @@
                 <h2 class="text-xl font-bold text-neutral-900 tracking-tight truncate sm:text-2xl">{{
                     title }}</h2>
                 <div class="flex items-center gap-2 flex-shrink-0 justify-end">
-                    <FilterDropdown v-if="activeState" :filters="activeState.filters" @update:filter="onFilterUpdate"
+                    <FilterDropdown v-if="activeState" :filters="activeState.filters"
+                        :filter-groups="filterGroups"
+                        :filter-dates="filterDates"
+                        :search-placeholder="searchPlaceholder"
+                        @update:filter="onFilterUpdate"
                         @reset="onFilterReset" />
                     <ColumnsDropdown :columns="localColumns" @update:columns="localColumns = $event" />
                 </div>
@@ -499,7 +503,10 @@ const props = withDefaults(defineProps<DataTableProps>(), {
     displayMode: 'paginated',
     storageId: '',
     selectable: true,
-    size: 'md'
+    size: 'md',
+    searchPlaceholder: undefined,   // undefined = show with default text; null = hide search box
+    filterGroups: () => [],
+    filterDates: () => [],
 })
 
 const emit = defineEmits<{

@@ -19,6 +19,25 @@
       @section-change="onSectionChange"
       @selection-change="onSelectionChange"
       size="md"
+      :filter-groups="[
+        { title: 'Estado', field: 'status', options: [
+          { label: 'Aprobado', value: 'approved' },
+          { label: 'Rechazado', value: 'rejected' },
+        ]},
+        { title: 'Categoría', field: 'category', options: [
+          { label: 'Grand Trans - Cab', value: 'Grand Trans - Cab' },
+          { label: 'Meals - Dinner', value: 'Meals - Dinner' },
+          { label: 'AC - Handling', value: 'AC - Handling' },
+          { label: 'Fuel', value: 'Fuel' },
+          { label: 'Office Supplies', value: 'Office Supplies' },
+          { label: 'Travel - Air', value: 'Travel - Air' },
+          { label: 'Hotel', value: 'Hotel' },
+          { label: 'Software', value: 'Software' },
+        ]},
+      ]"
+      :filter-dates="[
+        { field: 'date', mode: 'range', labelFrom: 'Desde', labelTo: 'Hasta' },
+      ]"
     >
       <template #col-voucher="{ value }">
         <a v-if="value" :href="String(value)" target="_blank" @click.stop

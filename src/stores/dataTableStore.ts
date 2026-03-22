@@ -9,7 +9,6 @@ import type {
   PaginationState,
   ApiPaginatedResponse,
   ApiQueryParams,
-  TransactionStatus,
   DisplayMode,
 } from '../types'
 
@@ -23,25 +22,40 @@ function defaultSort(): SortState {
   return { field: null, direction: 'asc' }
 }
 function defaultFilters(): DataTableFilter {
-  return { search: '', status: [], category: [], dateFrom: '', dateTo: '' }
+  return { search: '', fields: {}, dates: {} }
 }
 
 function applyLocalFilters(data: DataRow[], filters: DataTableFilter, sort: SortState): DataRow[] {
   let result = [...data]
+
+  // Search across all fields
   if (filters.search) {
     const q = filters.search.toLowerCase()
     result = result.filter(t =>
       Object.values(t).some(v => String(v ?? '').toLowerCase().includes(q))
     )
   }
-  if (filters.status?.length) {
-    result = result.filter(t => filters.status!.includes(t.status as TransactionStatus))
+
+  // ✦ CHANGED: dynamic checkbox groups (replaces hardcoded status/category)
+  if (filters.fields) {
+    for (const [field, values] of Object.entries(filters.fields)) {
+      if (!values || values.length === 0) continue
+      result = result.filter(row => values.includes(String(row[field] ?? '')))
+    }
   }
-  if (filters.category?.length) {
-    result = result.filter(t => filters.category!.includes(t.category as string))
+
+  // ✦ CHANGED: dynamic date filters (replaces hardcoded dateFrom/dateTo)
+  if (filters.dates) {
+    for (const [field, range] of Object.entries(filters.dates)) {
+      if (!range) continue
+      if (range.exact) {
+        result = result.filter(row => String(row[field] ?? '') === range.exact)
+      } else {
+        if (range.from) result = result.filter(row => String(row[field] ?? '') >= range.from!)
+        if (range.to)   result = result.filter(row => String(row[field] ?? '') <= range.to!)
+      }
+    }
   }
-  if (filters.dateFrom) result = result.filter(t => String(t.date ?? '') >= filters.dateFrom!)
-  if (filters.dateTo)   result = result.filter(t => String(t.date ?? '') <= filters.dateTo!)
 
   if (sort.field) {
     const f = sort.field
@@ -176,14 +190,16 @@ export const useDataTableStore = defineStore('dataTable', () => {
       transform?: (r: unknown) => ApiPaginatedResponse
     }
 
+    // Build query params — flatten fields/dates into conventional query params
     const params: ApiQueryParams = {
       page:      s.pagination.currentPage,
       perPage:   s.pagination.rowsPerPage,
       search:    s.filters.search,
-      status:    s.filters.status?.join(','),
-      category:  s.filters.category?.join(','),
-      dateFrom:  s.filters.dateFrom,
-      dateTo:    s.filters.dateTo,
+      // Legacy compat: if 'status' field exists, send as status param
+      status:    s.filters.fields?.['status']?.join(','),
+      category:  s.filters.fields?.['category']?.join(','),
+      dateFrom:  s.filters.dates?.['date']?.from,
+      dateTo:    s.filters.dates?.['date']?.to,
       sortField: s.sort.field ?? undefined,
       sortDir:   s.sort.direction,
     }

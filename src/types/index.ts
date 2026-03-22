@@ -67,6 +67,39 @@ export type ColumnDefinition = DataColumn | ActionsColumn
  */
 export type DisplayMode = 'paginated' | 'infinite'
 
+/** One option inside a filter group */
+export interface FilterOption {
+  label: string
+  value: string
+}
+
+/**
+ * A group of checkbox options targeting one row field.
+ * @example
+ * { title: 'Estado', field: 'status', options: [
+ *   { label: 'Aprobado', value: 'approved' },
+ * ]}
+ */
+export interface FilterGroup {
+  title: string
+  field: string
+  options: FilterOption[]
+}
+
+/**
+ * Date filter config for one row field.
+ * @example range  → { field: 'date',      mode: 'range',  labelFrom: 'Desde', labelTo: 'Hasta' }
+ * @example single → { field: 'createdAt', mode: 'single', label: 'Fecha exacta' }
+ */
+export interface FilterDateConfig {
+  field: string
+  mode: 'range' | 'single'
+  title?: string
+  label?: string
+  labelFrom?: string
+  labelTo?: string
+}
+
 // ─────────────────────────────────────────────
 // API contract
 // ─────────────────────────────────────────────
@@ -119,10 +152,17 @@ export interface SectionDefinition {
 // ─────────────────────────────────────────────
 export interface DataTableFilter {
   search?: string
-  status?: TransactionStatus[]
-  category?: string[]
-  dateFrom?: string
-  dateTo?: string
+  /**
+   * Dynamic multi-value filters per field.
+   * e.g. { status: ['approved', 'rejected'], category: ['Fuel'] }
+   */
+  fields?: Record<string, string[]>
+  /**
+   * Dynamic date filters per field.
+   * range  → { date: { from: '2024-01-01', to: '2024-12-31' } }
+   * single → { createdAt: { exact: '2024-06-15' } }
+   */
+  dates?: Record<string, { from?: string; to?: string; exact?: string }>
 }
 
 export interface SortState {
@@ -177,7 +217,20 @@ export interface DataTableProps {
   selectable?: boolean
   /** Optional function to determine if a row is selectable. */
   isRowSelectable?: (row: DataRow) => boolean,
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg',
+  /**
+   * Text for the search input. Pass null to hide the search box entirely.
+   * Default: shows search with generic placeholder.
+   */
+  searchPlaceholder?: string | null
+  /**
+   * Groups of checkbox filters. Each group targets one row field.
+   */
+  filterGroups?: FilterGroup[]
+  /**
+   * Date filter configuration. Each entry targets one row field.
+   */
+  filterDates?: FilterDateConfig[]
 }
 
 // Legacy compat alias
