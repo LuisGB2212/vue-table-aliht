@@ -117,12 +117,9 @@ export interface ApiQueryParams {
   page: number
   perPage: number
   search?: string
-  status?: string
-  category?: string
-  dateFrom?: string
-  dateTo?: string
   sortField?: string
   sortDir?: 'asc' | 'desc'
+  [key: string]: string | number | undefined
 }
 
 // ─────────────────────────────────────────────

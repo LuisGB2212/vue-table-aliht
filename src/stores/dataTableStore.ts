@@ -74,15 +74,11 @@ function applyLocalFilters(data: DataRow[], filters: DataTableFilter, sort: Sort
 
 function buildQueryString(params: ApiQueryParams): string {
   const q = new URLSearchParams()
-  q.set('page', String(params.page))
-  q.set('perPage', String(params.perPage))
-  if (params.search)    q.set('search', params.search)
-  if (params.status)    q.set('status', params.status)
-  if (params.category)  q.set('category', params.category)
-  if (params.dateFrom)  q.set('dateFrom', params.dateFrom)
-  if (params.dateTo)    q.set('dateTo', params.dateTo)
-  if (params.sortField) q.set('sortField', params.sortField)
-  if (params.sortDir)   q.set('sortDir', params.sortDir)
+  for (const [key, val] of Object.entries(params)) {
+    if (val !== undefined && val !== null && val !== '') {
+      q.set(key, String(val))
+    }
+  }
   return q.toString()
 }
 
