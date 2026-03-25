@@ -168,12 +168,23 @@
 
             <!-- Loading cards -->
             <template v-if="activeState?.loading">
-                <div v-for="n in 4" :key="n" class="px-4 py-4 border-b border-neutral-100 animate-pulse">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="h-4 w-32 bg-neutral-100 rounded" />
-                        <div class="h-5 w-16 bg-neutral-100 rounded-full" />
+                <div v-for="n in (activeState.pagination.rowsPerPage || 5)" :key="n" class="border-b border-neutral-100 last:border-0 pointer-events-none">
+                    <div class="flex items-center gap-3 px-4 py-3.5">
+                        <div v-if="selectable" class="flex-shrink-0 animate-pulse">
+                            <div class="w-4 h-4 rounded border border-neutral-200 bg-neutral-100/50" />
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="h-4 bg-neutral-200/80 rounded animate-pulse" :class="['w-1/2', 'w-2/3', 'w-3/5', 'w-2/5'][n % 4]" />
+                                <div class="flex-shrink-0">
+                                    <div v-if="badgeCol?.type === 'status'" class="w-16 h-5 bg-neutral-200/80 rounded-full animate-pulse" />
+                                    <div v-else class="w-12 h-4 bg-neutral-200/80 rounded animate-pulse" />
+                                </div>
+                            </div>
+                            <div class="h-3 bg-neutral-200/50 rounded animate-pulse mt-2" :class="['w-1/3', 'w-1/4', 'w-2/5', 'w-1/2'][n % 4]" />
+                        </div>
+                        <div class="w-4 h-4 rounded flex-shrink-0 bg-neutral-200/80 animate-pulse" />
                     </div>
-                    <div class="h-3 w-48 bg-neutral-100 rounded" />
                 </div>
             </template>
 
@@ -354,13 +365,38 @@
 
                 <tbody>
                     <template v-if="activeState?.loading">
-                        <tr v-for="n in activeState.pagination.rowsPerPage" :key="n" class="border-b border-neutral-200">
+                        <tr v-for="n in (activeState.pagination.rowsPerPage || 10)" :key="n" class="border-b border-neutral-100 pointer-events-none">
                             <td v-if="selectable" :class="sizeTable[size]">
-                                <div class="w-4 h-4 bg-neutral-100 rounded animate-pulse" />
+                                <div class="w-4 h-4 rounded border border-neutral-200 bg-neutral-100/50 animate-pulse" />
                             </td>
-                            <td v-for="col in visibleColumns" :key="colKey(col)" :class="sizeTable[size]">
-                                <div class="h-4 bg-neutral-100 rounded animate-pulse"
-                                    :style="`width: ${60 + Math.random() * 60}px`" />
+                            <td v-for="(col, i) in visibleColumns" :key="colKey(col)" :style="colStyle(col)" :class="[
+                                `${sizeTable[size]}`,
+                                alignClass(col.align ?? 'left'),
+                                col.cellClass ?? ''
+                            ]">
+                                <div class="flex w-full" :class="[
+                                    col.align === 'center' ? 'justify-center' : (col.align === 'right' ? 'justify-end' : 'justify-start')
+                                ]">
+                                    <template v-if="col.type === 'actions'">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-5 h-5 bg-neutral-200/80 rounded animate-pulse" />
+                                            <div class="w-5 h-5 bg-neutral-200/80 rounded animate-pulse" />
+                                        </div>
+                                    </template>
+                                    <template v-else-if="col.type === 'status'">
+                                        <div class="w-20 h-5 bg-neutral-200/80 rounded-full animate-pulse" />
+                                    </template>
+                                    <template v-else-if="col.type === 'currency'">
+                                        <div class="w-16 h-4 bg-neutral-200/80 rounded animate-pulse" />
+                                    </template>
+                                    <template v-else-if="col.type === 'date'">
+                                        <div class="w-20 h-4 bg-neutral-200/80 rounded animate-pulse" />
+                                    </template>
+                                    <template v-else>
+                                        <div class="h-4 bg-neutral-200/80 rounded animate-pulse"
+                                            :style="`width: ${['40%', '60%', '75%', '50%'][(n + i) % 4]}`" />
+                                    </template>
+                                </div>
                             </td>
                         </tr>
                     </template>
